@@ -9,11 +9,11 @@ HEIGHT = 450
 
 
 def filter_isic_train():
-    feature_names = [x for x in os.listdir('data/Isic/Train') if not x.startswith('.')]
+    feature_names = [x for x in os.listdir('../data/Isic/Train') if not x.startswith('.')]
     idx = [4, 3, -1, 0, 2, 1, -2, -4, -3]
     feature_names = [feature_names[x] for x in idx]
 
-    list_of_images = [val for sublist in [[os.path.join(i[0], j) for j in i[2]] for i in os.walk('data/Isic/Train')]
+    list_of_images = [val for sublist in [[os.path.join(i[0], j) for j in i[2]] for i in os.walk('../data/Isic/Train')]
                       for val in sublist][1:]
 
     zuweisungen = [0, 1, 2, 3, 4, 6, 6, 505, 5]
@@ -55,14 +55,14 @@ def filter_isic_train():
 
 
 def filter_isic_test():
-    feature_names = [x for x in os.listdir('data/Isic/Train') if not x.startswith('.')]
+    feature_names = [x for x in os.listdir('../data/Isic/Train') if not x.startswith('.')]
     idx = [4, 3, -1, 0, 2, 1, -2, -4, -3]
     feature_names = [feature_names[x] for x in idx]
 
     zuweisungen = [0, 1, 2, 3, 4, 6, 6, 505, 5]
     features = dict(zip(feature_names, zuweisungen))
 
-    list_of_images = [val for sublist in [[os.path.join(i[0], j) for j in i[2]] for i in os.walk('data/Isic/Test')] for
+    list_of_images = [val for sublist in [[os.path.join(i[0], j) for j in i[2]] for i in os.walk('../data/Isic/Test')] for
                       val in sublist][1:]
 
     isic = np.zeros((102, HEIGHT, WIDTH, 3))
@@ -98,8 +98,8 @@ def filter_isic_test():
 
 
 def filter_ham10k():
-    ham = pd.read_csv('data/ham10k/hmnist_28_28_RGB.csv')
-    ham_meta = pd.read_csv('data/ham10k/HAM10000_metadata.csv')
+    ham = pd.read_csv('../data/ham10k/hmnist_28_28_RGB.csv')
+    ham_meta = pd.read_csv('../data/ham10k/HAM10000_metadata.csv')
     # Filter only images labelled with histo quality
     ham = ham[ham_meta['dx_type'] == 'histo']
     # Filter for nevus and melanoma
@@ -125,7 +125,7 @@ def filter_ham10k():
 
 def filter_isic2020_train(start=0, end=None, name="test"):
     # Set metadata directory
-    meta_dir = "data/Isic_2020/Train/ISIC_2020_Training_GroundTruth.csv"
+    meta_dir = "../data/Isic_2020/Train/ISIC_2020_Training_GroundTruth.csv"
     # Load metadata, select labels
     isic_y = pd.read_csv(meta_dir)['diagnosis'].to_numpy()
     # Cut out selection
@@ -137,7 +137,7 @@ def filter_isic2020_train(start=0, end=None, name="test"):
     isic_y = isic_y[class_mask]
 
     # Set image directory
-    folder_dir = "data/Isic_2020/Train/input"
+    folder_dir = "../data/Isic_2020/Train/input"
     # Load image dirs
     image_dirs = os.listdir(folder_dir)
     # Check if there are some unnecessary files inbetween
@@ -171,7 +171,7 @@ def filter_isic2020_train(start=0, end=None, name="test"):
 
 
 def filter_isic2020_test():
-    folder_dir = "data/Isic_2020/Test/ISIC_2020_Test_Input"
+    folder_dir = "../data/Isic_2020/Test/ISIC_2020_Test_Input"
     image_dirs = os.listdir(folder_dir)
     image_dirs = [x for x in image_dirs if (x.endswith(".jpg"))]
 
@@ -205,7 +205,7 @@ def filter_isic2020_test():
 
 def filter_isic2019_train(start=0, end=None, name="all"):
     # Set metadata directory
-    meta_dir = "data/Isic_2019/Train/ISIC_2019_Training_GroundTruth.csv"
+    meta_dir = "../data/Isic_2019/Train/ISIC_2019_Training_GroundTruth.csv"
     # Load metadata
     isic_y = pd.read_csv(meta_dir)
     # Make every NV Marker a 2 instead of a 1
@@ -223,7 +223,7 @@ def filter_isic2019_train(start=0, end=None, name="all"):
     isic_y = isic_y[class_mask]
 
     # Set image directory
-    folder_dir = "data/Isic_2019/Train/ISIC_2019_Training_Input"
+    folder_dir = "../data/Isic_2019/Train/ISIC_2019_Training_Input"
     # Load image dirs
     image_dirs = os.listdir(folder_dir)
     # Check if there are some unnecessary files inbetween
