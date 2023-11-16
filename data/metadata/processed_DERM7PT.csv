@@ -1,0 +1,1012 @@
+id,image_id,lesion_id,patient_id,dx,dx_type,age,sex,localization,melanocytic,benign_malignant,image_type,dataset
+1,Nel026,,,basal cell carcinoma,,,female,abdomen,,,,DERM7PT
+2,Nel028,,,basal cell carcinoma,,,female,head neck,,,,DERM7PT
+3,Nel033,,,basal cell carcinoma,,,female,head neck,,,,DERM7PT
+4,Nel035,,,basal cell carcinoma,,,male,lower limbs,,,,DERM7PT
+5,Nel037,,,basal cell carcinoma,,,female,upper limbs,,,,DERM7PT
+6,Nel039,,,basal cell carcinoma,,,female,head neck,,,,DERM7PT
+7,Nel041,,,basal cell carcinoma,,,male,back,,,,DERM7PT
+8,Nel085,,,basal cell carcinoma,,,male,head neck,,,,DERM7PT
+9,Nel087,,,basal cell carcinoma,,,female,back,,,,DERM7PT
+10,Nel089,,,basal cell carcinoma,,,female,head neck,,,,DERM7PT
+11,Nel091,,,basal cell carcinoma,,,female,head neck,,,,DERM7PT
+12,Nel092,,,basal cell carcinoma,,,male,back,,,,DERM7PT
+13,Nel095,,,basal cell carcinoma,,,male,head neck,,,,DERM7PT
+14,Nel097,,,basal cell carcinoma,,,female,head neck,,,,DERM7PT
+15,Nel098,,,basal cell carcinoma,,,female,upper limbs,,,,DERM7PT
+16,Nel100,,,basal cell carcinoma,,,male,head neck,,,,DERM7PT
+17,Nfl068,,,basal cell carcinoma,,,male,back,,,,DERM7PT
+18,Ngl047,,,basal cell carcinoma,,,male,back,,,,DERM7PT
+19,Nhl011,,,basal cell carcinoma,,,female,back,,,,DERM7PT
+20,Nml098,,,basal cell carcinoma,,,male,back,,,,DERM7PT
+21,Nml102,,,basal cell carcinoma,,,female,upper limbs,,,,DERM7PT
+22,Nml104,,,basal cell carcinoma,,,male,back,,,,DERM7PT
+23,Nml106,,,basal cell carcinoma,,,female,head neck,,,,DERM7PT
+24,Adl379,,,basal cell carcinoma,,,female,head neck,,,,DERM7PT
+25,Ael455,,,basal cell carcinoma,,,male,head neck,,,,DERM7PT
+26,Ael469,,,basal cell carcinoma,,,female,head neck,,,,DERM7PT
+27,Ael502,,,basal cell carcinoma,,,female,back,,,,DERM7PT
+28,Ael505,,,basal cell carcinoma,,,male,head neck,,,,DERM7PT
+29,gzl02,,,basal cell carcinoma,,,female,back,,,,DERM7PT
+30,gzl06,,,basal cell carcinoma,,,female,back,,,,DERM7PT
+31,gzl38,,,basal cell carcinoma,,,male,back,,,,DERM7PT
+32,Gal098,,,basal cell carcinoma,,,male,back,,,,DERM7PT
+33,Fal096,,,basal cell carcinoma,,,female,back,,,,DERM7PT
+34,Fcl062,,,basal cell carcinoma,,,female,back,,,,DERM7PT
+35,Fdl070,,,basal cell carcinoma,,,male,back,,,,DERM7PT
+36,Ggl028,,,basal cell carcinoma,,,male,back,,,,DERM7PT
+37,Ggl030,,,basal cell carcinoma,,,male,back,,,,DERM7PT
+38,Ggl082,,,basal cell carcinoma,,,female,chest,,,,DERM7PT
+39,Fgl088,,,basal cell carcinoma,,,female,upper limbs,,,,DERM7PT
+40,Fgl053,,,basal cell carcinoma,,,female,head neck,,,,DERM7PT
+41,Fhl050,,,basal cell carcinoma,,,female,head neck,,,,DERM7PT
+42,Fhl052,,,basal cell carcinoma,,,male,head neck,,,,DERM7PT
+43,Nfl040,,,nevus,,,female,acral,,,,DERM7PT
+44,Nfl046,,,nevus,,,male,head neck,,,,DERM7PT
+45,Nfl048,,,nevus,,,male,lower limbs,,,,DERM7PT
+46,Nfl050,,,nevus,,,female,upper limbs,,,,DERM7PT
+47,Ngl072,,,nevus,,,female,head neck,,,,DERM7PT
+48,Ngl090,,,nevus,,,male,buttocks,,,,DERM7PT
+49,Nml043,,,nevus,,,male,acral,,,,DERM7PT
+50,Nml087,,,nevus,,,female,lower limbs,,,,DERM7PT
+51,Nml089,,,nevus,,,female,upper limbs,,,,DERM7PT
+52,Aal068,,,nevus,,,male,acral,,,,DERM7PT
+53,Adl325,,,nevus,,,male,upper limbs,,,,DERM7PT
+54,Ael442,,,nevus,,,male,chest,,,,DERM7PT
+55,Ael444,,,nevus,,,female,back,,,,DERM7PT
+56,Ael446,,,nevus,,,female,head neck,,,,DERM7PT
+57,Ael508,,,nevus,,,female,lower limbs,,,,DERM7PT
+58,Ael510,,,nevus,,,male,back,,,,DERM7PT
+59,Ael512,,,nevus,,,female,back,,,,DERM7PT
+60,gzl24,,,nevus,,,female,lower limbs,,,,DERM7PT
+61,gzl88,,,nevus,,,female,lower limbs,,,,DERM7PT
+62,gzl42,,,nevus,,,female,back,,,,DERM7PT
+63,Fal012,,,nevus,,,female,back,,,,DERM7PT
+64,FBL032,,,nevus,,,female,lower limbs,,,,DERM7PT
+65,Fcl088,,,nevus,,,female,upper limbs,,,,DERM7PT
+66,FDL026,,,nevus,,,male,upper limbs,,,,DERM7PT
+67,Ggl004,,,nevus,,,female,back,,,,DERM7PT
+68,Ggl006,,,nevus,,,female,head neck,,,,DERM7PT
+69,Fgl063,,,nevus,,,female,upper limbs,,,,DERM7PT
+70,Fgl090,,,nevus,,,female,lower limbs,,,,DERM7PT
+71,Ndl005,,,nevus,,,female,back,,,,DERM7PT
+72,Nbl076,,,nevus,,,female,lower limbs,,,,DERM7PT
+73,Nbl081,,,nevus,,,male,upper limbs,,,,DERM7PT
+74,Nbl086,,,nevus,,,female,lower limbs,,,,DERM7PT
+75,Nbl095,,,nevus,,,female,acral,,,,DERM7PT
+76,Nbl098,,,nevus,,,female,back,,,,DERM7PT
+77,Ncl004,,,nevus,,,male,back,,,,DERM7PT
+78,Ncl006,,,nevus,,,male,abdomen,,,,DERM7PT
+79,Ncl008,,,nevus,,,male,back,,,,DERM7PT
+80,Ncl010,,,nevus,,,female,back,,,,DERM7PT
+81,Ncl012,,,nevus,,,male,chest,,,,DERM7PT
+82,Ncl014,,,nevus,,,female,back,,,,DERM7PT
+83,Ncl022,,,nevus,,,female,upper limbs,,,,DERM7PT
+84,Ncl030,,,nevus,,,female,back,,,,DERM7PT
+85,Ncl035,,,nevus,,,female,upper limbs,,,,DERM7PT
+86,Ncl044,,,nevus,,,female,back,,,,DERM7PT
+87,Ncl048,,,nevus,,,female,abdomen,,,,DERM7PT
+88,Ncl050,,,nevus,,,female,upper limbs,,,,DERM7PT
+89,Ncl051,,,nevus,,,female,back,,,,DERM7PT
+90,Ncl053,,,nevus,,,male,back,,,,DERM7PT
+91,Ncl056,,,nevus,,,male,chest,,,,DERM7PT
+92,Ncl063,,,nevus,,,male,back,,,,DERM7PT
+93,Ncl064,,,nevus,,,female,back,,,,DERM7PT
+94,Ncl069,,,nevus,,,male,lower limbs,,,,DERM7PT
+95,Ncl076,,,nevus,,,male,chest,,,,DERM7PT
+96,Ncl079,,,nevus,,,male,back,,,,DERM7PT
+97,Ncl083,,,nevus,,,male,abdomen,,,,DERM7PT
+98,Ncl085,,,nevus,,,male,abdomen,,,,DERM7PT
+99,Ndl009,,,nevus,,,female,upper limbs,,,,DERM7PT
+100,Ndl012,,,nevus,,,male,acral,,,,DERM7PT
+101,ndl013,,,nevus,,,female,lower limbs,,,,DERM7PT
+102,Ndl018,,,nevus,,,female,chest,,,,DERM7PT
+103,Ndl021,,,nevus,,,male,back,,,,DERM7PT
+104,Ndl022,,,nevus,,,male,back,,,,DERM7PT
+105,Ndl025,,,nevus,,,male,back,,,,DERM7PT
+106,Ndl027,,,nevus,,,male,back,,,,DERM7PT
+107,Ndl028,,,nevus,,,female,back,,,,DERM7PT
+108,Ndl031,,,nevus,,,female,abdomen,,,,DERM7PT
+109,Ndl033,,,nevus,,,female,abdomen,,,,DERM7PT
+110,Ndl035,,,nevus,,,female,abdomen,,,,DERM7PT
+111,Ndl037,,,nevus,,,male,abdomen,,,,DERM7PT
+112,Ndl039,,,nevus,,,male,abdomen,,,,DERM7PT
+113,Ndl040,,,nevus,,,female,lower limbs,,,,DERM7PT
+114,Nfl032,,,nevus,,,female,acral,,,,DERM7PT
+115,Nfl052,,,nevus,,,male,back,,,,DERM7PT
+116,Ngl023,,,nevus,,,female,upper limbs,,,,DERM7PT
+117,Ngl043,,,nevus,,,female,lower limbs,,,,DERM7PT
+118,Ngl049,,,nevus,,,female,back,,,,DERM7PT
+119,Ngl053,,,nevus,,,female,abdomen,,,,DERM7PT
+120,Ngl074,,,nevus,,,male,lower limbs,,,,DERM7PT
+121,Ngl076,,,nevus,,,female,chest,,,,DERM7PT
+122,Ngl092,,,nevus,,,female,back,,,,DERM7PT
+123,Ngl094,,,nevus,,,male,back,,,,DERM7PT
+124,Ngl096,,,nevus,,,male,abdomen,,,,DERM7PT
+125,Nhl013,,,nevus,,,male,back,,,,DERM7PT
+126,Nhl015,,,nevus,,,male,back,,,,DERM7PT
+127,Nil002,,,nevus,,,female,chest,,,,DERM7PT
+128,Nil006,,,nevus,,,female,acral,,,,DERM7PT
+129,Nil008,,,nevus,,,male,back,,,,DERM7PT
+130,Nil010,,,nevus,,,female,back,,,,DERM7PT
+131,Nil021,,,nevus,,,male,lower limbs,,,,DERM7PT
+132,Nil025,,,nevus,,,female,back,,,,DERM7PT
+133,Nil027,,,nevus,,,male,back,,,,DERM7PT
+134,Nil033,,,nevus,,,female,abdomen,,,,DERM7PT
+135,Nil035,,,nevus,,,female,chest,,,,DERM7PT
+136,Nil037,,,nevus,,,female,buttocks,,,,DERM7PT
+137,Nil043,,,nevus,,,female,acral,,,,DERM7PT
+138,Nil045,,,nevus,,,male,chest,,,,DERM7PT
+139,Nil048,,,nevus,,,female,acral,,,,DERM7PT
+140,Nil052,,,nevus,,,male,chest,,,,DERM7PT
+141,Nil054,,,nevus,,,male,back,,,,DERM7PT
+142,Nil056,,,nevus,,,male,abdomen,,,,DERM7PT
+143,Nil060,,,nevus,,,male,abdomen,,,,DERM7PT
+144,Nll016,,,nevus,,,male,abdomen,,,,DERM7PT
+145,Nll018,,,nevus,,,female,abdomen,,,,DERM7PT
+146,Nll020,,,nevus,,,male,lower limbs,,,,DERM7PT
+147,nll022,,,nevus,,,female,upper limbs,,,,DERM7PT
+148,nll026,,,nevus,,,female,lower limbs,,,,DERM7PT
+149,Nll030,,,nevus,,,male,acral,,,,DERM7PT
+150,nll032,,,nevus,,,female,acral,,,,DERM7PT
+151,NLL034,,,nevus,,,male,acral,,,,DERM7PT
+152,Nll042,,,nevus,,,male,abdomen,,,,DERM7PT
+153,Nll046,,,nevus,,,male,upper limbs,,,,DERM7PT
+154,Nll060,,,nevus,,,female,abdomen,,,,DERM7PT
+155,Nll062,,,nevus,,,male,abdomen,,,,DERM7PT
+156,NLL067,,,nevus,,,female,lower limbs,,,,DERM7PT
+157,Nll069,,,nevus,,,male,lower limbs,,,,DERM7PT
+158,Nll072,,,nevus,,,male,lower limbs,,,,DERM7PT
+159,Nll076,,,nevus,,,female,lower limbs,,,,DERM7PT
+160,Nll084,,,nevus,,,male,back,,,,DERM7PT
+161,Nll094,,,nevus,,,male,upper limbs,,,,DERM7PT
+162,Nll098,,,nevus,,,male,abdomen,,,,DERM7PT
+163,Nll102,,,nevus,,,female,chest,,,,DERM7PT
+164,Nll104,,,nevus,,,female,lower limbs,,,,DERM7PT
+165,Nll106,,,nevus,,,female,upper limbs,,,,DERM7PT
+166,Nml002,,,nevus,,,male,buttocks,,,,DERM7PT
+167,Nml006,,,nevus,,,female,back,,,,DERM7PT
+168,Nml008,,,nevus,,,female,abdomen,,,,DERM7PT
+169,Nml014,,,nevus,,,female,back,,,,DERM7PT
+170,Nml018,,,nevus,,,female,chest,,,,DERM7PT
+171,Nml030,,,nevus,,,male,back,,,,DERM7PT
+172,Nml034,,,nevus,,,female,back,,,,DERM7PT
+173,Nml085,,,nevus,,,male,back,,,,DERM7PT
+174,Adl381,,,nevus,,,female,abdomen,,,,DERM7PT
+175,Adl387,,,nevus,,,female,back,,,,DERM7PT
+176,Abl101,,,nevus,,,female,acral,,,,DERM7PT
+177,Abl108,,,nevus,,,male,acral,,,,DERM7PT
+178,Abl112,,,nevus,,,female,acral,,,,DERM7PT
+179,Abl116,,,nevus,,,female,acral,,,,DERM7PT
+180,Abl118,,,nevus,,,female,acral,,,,DERM7PT
+181,Abl121,,,nevus,,,male,acral,,,,DERM7PT
+182,Abl123,,,nevus,,,male,acral,,,,DERM7PT
+183,Abl127,,,nevus,,,male,lower limbs,,,,DERM7PT
+184,Abl129,,,nevus,,,female,acral,,,,DERM7PT
+185,Acl201,,,nevus,,,male,acral,,,,DERM7PT
+186,Acl243,,,nevus,,,female,acral,,,,DERM7PT
+187,Acl245,,,nevus,,,male,acral,,,,DERM7PT
+188,Acl247,,,nevus,,,female,acral,,,,DERM7PT
+189,Acl249,,,nevus,,,male,acral,,,,DERM7PT
+190,Acl251,,,nevus,,,male,acral,,,,DERM7PT
+191,Acl253,,,nevus,,,female,acral,,,,DERM7PT
+192,Acl264,,,nevus,,,male,acral,,,,DERM7PT
+193,Adl333,,,nevus,,,male,acral,,,,DERM7PT
+194,Adl344,,,nevus,,,female,acral,,,,DERM7PT
+195,Adl375,,,nevus,,,male,acral,,,,DERM7PT
+196,Aal044,,,nevus,,,female,acral,,,,DERM7PT
+197,Aal046,,,nevus,,,female,acral,,,,DERM7PT
+198,Aal048,,,nevus,,,male,acral,,,,DERM7PT
+199,Aal052,,,nevus,,,female,acral,,,,DERM7PT
+200,Aal056,,,nevus,,,male,acral,,,,DERM7PT
+201,Aal062,,,nevus,,,male,acral,,,,DERM7PT
+202,Aal064,,,nevus,,,female,acral,,,,DERM7PT
+203,Aal066,,,nevus,,,male,acral,,,,DERM7PT
+204,Aal078,,,nevus,,,male,acral,,,,DERM7PT
+205,Aal086,,,nevus,,,male,acral,,,,DERM7PT
+206,Aal088,,,nevus,,,male,acral,,,,DERM7PT
+207,Aal090,,,nevus,,,male,acral,,,,DERM7PT
+208,Aal094,,,nevus,,,male,acral,,,,DERM7PT
+209,Aal096,,,nevus,,,female,acral,,,,DERM7PT
+210,Aal099bis,,,nevus,,,male,acral,,,,DERM7PT
+211,Ael477,,,nevus,,,male,back,,,,DERM7PT
+212,Abl135,,,nevus,,,male,back,,,,DERM7PT
+213,Abl137,,,nevus,,,female,abdomen,,,,DERM7PT
+214,Abl139,,,nevus,,,female,back,,,,DERM7PT
+215,Abl141,,,nevus,,,female,chest,,,,DERM7PT
+216,Abl191,,,nevus,,,female,back,,,,DERM7PT
+217,Acl219,,,nevus,,,male,back,,,,DERM7PT
+218,Acl223,,,nevus,,,female,buttocks,,,,DERM7PT
+219,Acl281,,,nevus,,,female,lower limbs,,,,DERM7PT
+220,Acl283,,,nevus,,,male,chest,,,,DERM7PT
+221,Acl287,,,nevus,,,female,back,,,,DERM7PT
+222,Adl319,,,nevus,,,male,abdomen,,,,DERM7PT
+223,Adl391,,,nevus,,,female,upper limbs,,,,DERM7PT
+224,Ael435,,,nevus,,,male,back,,,,DERM7PT
+225,Ael448,,,nevus,,,female,head neck,,,,DERM7PT
+226,Ael481,,,nevus,,,female,abdomen,,,,DERM7PT
+227,Adl362,,,nevus,,,male,lower limbs,,,,DERM7PT
+228,Aal010,,,nevus,,,male,back,,,,DERM7PT
+229,Aal012,,,nevus,,,male,chest,,,,DERM7PT
+230,Abl143,,,nevus,,,male,chest,,,,DERM7PT
+231,Abl145,,,nevus,,,male,back,,,,DERM7PT
+232,Abl151,,,nevus,,,female,buttocks,,,,DERM7PT
+233,Abl153,,,nevus,,,male,back,,,,DERM7PT
+234,Abl155,,,nevus,,,female,abdomen,,,,DERM7PT
+235,Abl147,,,nevus,,,male,lower limbs,,,,DERM7PT
+236,Abl157,,,nevus,,,female,abdomen,,,,DERM7PT
+237,Abl161,,,nevus,,,female,lower limbs,,,,DERM7PT
+238,Abl163,,,nevus,,,male,back,,,,DERM7PT
+239,Abl165,,,nevus,,,male,back,,,,DERM7PT
+240,Abl167,,,nevus,,,female,back,,,,DERM7PT
+241,Abl168,,,nevus,,,female,abdomen,,,,DERM7PT
+242,Abl171,,,nevus,,,male,back,,,,DERM7PT
+243,Abl175,,,nevus,,,female,buttocks,,,,DERM7PT
+244,Abl177,,,nevus,,,female,buttocks,,,,DERM7PT
+245,Abl179,,,nevus,,,female,lower limbs,,,,DERM7PT
+246,Abl185,,,nevus,,,female,upper limbs,,,,DERM7PT
+247,Abl195,,,nevus,,,male,back,,,,DERM7PT
+248,Acl215,,,nevus,,,male,back,,,,DERM7PT
+249,Acl217,,,nevus,,,male,chest,,,,DERM7PT
+250,Acl221,,,nevus,,,male,lower limbs,,,,DERM7PT
+251,Acl235,,,nevus,,,female,back,,,,DERM7PT
+252,Acl239,,,nevus,,,male,upper limbs,,,,DERM7PT
+253,Acl241,,,nevus,,,male,chest,,,,DERM7PT
+254,Acl259,,,nevus,,,female,abdomen,,,,DERM7PT
+255,Acl271,,,nevus,,,male,buttocks,,,,DERM7PT
+256,Acl279,,,nevus,,,male,back,,,,DERM7PT
+257,Acl299,,,nevus,,,male,lower limbs,,,,DERM7PT
+258,Aal004,,,nevus,,,male,back,,,,DERM7PT
+259,Adl311,,,nevus,,,female,abdomen,,,,DERM7PT
+260,Adl321,,,nevus,,,male,lower limbs,,,,DERM7PT
+261,Adl329,,,nevus,,,male,lower limbs,,,,DERM7PT
+262,Adl335,,,nevus,,,female,upper limbs,,,,DERM7PT
+263,Adl340,,,nevus,,,female,back,,,,DERM7PT
+264,Adl346,,,nevus,,,male,abdomen,,,,DERM7PT
+265,Adl348,,,nevus,,,male,back,,,,DERM7PT
+266,Adl350,,,nevus,,,male,back,,,,DERM7PT
+267,Adl356,,,nevus,,,male,chest,,,,DERM7PT
+268,Adl366,,,nevus,,,female,abdomen,,,,DERM7PT
+269,Adl371,,,nevus,,,female,abdomen,,,,DERM7PT
+270,Ael413,,,nevus,,,male,lower limbs,,,,DERM7PT
+271,Ael419,,,nevus,,,male,lower limbs,,,,DERM7PT
+272,Ael425,,,nevus,,,female,abdomen,,,,DERM7PT
+273,Ael431,,,nevus,,,male,lower limbs,,,,DERM7PT
+274,Ael433,,,nevus,,,male,abdomen,,,,DERM7PT
+275,Ael452,,,nevus,,,female,back,,,,DERM7PT
+276,Ael467,,,nevus,,,female,chest,,,,DERM7PT
+277,Ael471,,,nevus,,,male,lower limbs,,,,DERM7PT
+278,Aal006,,,nevus,,,male,back,,,,DERM7PT
+279,Ael517,,,nevus,,,female,abdomen,,,,DERM7PT
+280,Ael523,,,nevus,,,male,buttocks,,,,DERM7PT
+281,Ael525,,,nevus,,,female,back,,,,DERM7PT
+282,Aal008,,,nevus,,,male,chest,,,,DERM7PT
+283,gzl56,,,nevus,,,female,back,,,,DERM7PT
+284,gzl08,,,nevus,,,male,back,,,,DERM7PT
+285,gzl62,,,nevus,,,male,back,,,,DERM7PT
+286,gzl66,,,nevus,,,male,back,,,,DERM7PT
+287,gzl22,,,nevus,,,male,back,,,,DERM7PT
+288,gzl70,,,nevus,,,male,lower limbs,,,,DERM7PT
+289,gzl10,,,nevus,,,male,back,,,,DERM7PT
+290,gzl80,,,nevus,,,male,back,,,,DERM7PT
+291,gzl84,,,nevus,,,male,back,,,,DERM7PT
+292,gzl86,,,nevus,,,female,back,,,,DERM7PT
+293,gzl32,,,nevus,,,female,chest,,,,DERM7PT
+294,gzl34,,,nevus,,,female,chest,,,,DERM7PT
+295,gzl36,,,nevus,,,male,abdomen,,,,DERM7PT
+296,gzl54,,,nevus,,,male,abdomen,,,,DERM7PT
+297,Gal232,,,nevus,,,male,back,,,,DERM7PT
+298,Gal010,,,nevus,,,male,back,,,,DERM7PT
+299,Gal016,,,nevus,,,male,back,,,,DERM7PT
+300,Gal025,,,nevus,,,female,back,,,,DERM7PT
+301,Gal045,,,nevus,,,male,back,,,,DERM7PT
+302,Gal047,,,nevus,,,male,back,,,,DERM7PT
+303,Gal049,,,nevus,,,male,back,,,,DERM7PT
+304,Gal043,,,nevus,,,male,back,,,,DERM7PT
+305,Gal006,,,nevus,,,female,back,,,,DERM7PT
+306,Gal058,,,nevus,,,male,back,,,,DERM7PT
+307,Gal230,,,nevus,,,female,buttocks,,,,DERM7PT
+308,Gal152,,,nevus,,,female,abdomen,,,,DERM7PT
+309,Fal020,,,nevus,,,female,lower limbs,,,,DERM7PT
+310,Fal024,,,nevus,,,male,chest,,,,DERM7PT
+311,FAL036,,,nevus,,,female,back,,,,DERM7PT
+312,FAL038,,,nevus,,,female,lower limbs,,,,DERM7PT
+313,FAL042,,,nevus,,,female,back,,,,DERM7PT
+314,FAL044,,,nevus,,,female,back,,,,DERM7PT
+315,Fal050,,,nevus,,,male,abdomen,,,,DERM7PT
+316,FAL054,,,nevus,,,male,back,,,,DERM7PT
+317,Fal064,,,nevus,,,female,abdomen,,,,DERM7PT
+318,Fal072,,,nevus,,,female,chest,,,,DERM7PT
+319,Fal090,,,nevus,,,male,abdomen,,,,DERM7PT
+320,Fal100,,,nevus,,,female,lower limbs,,,,DERM7PT
+321,Fbl002,,,nevus,,,female,abdomen,,,,DERM7PT
+322,Fbl004,,,nevus,,,female,chest,,,,DERM7PT
+323,Fbl006,,,nevus,,,male,chest,,,,DERM7PT
+324,Fbl010,,,nevus,,,male,back,,,,DERM7PT
+325,FBL012,,,nevus,,,female,lower limbs,,,,DERM7PT
+326,Fll019,,,nevus,,,male,back,,,,DERM7PT
+327,Fll021,,,nevus,,,female,lower limbs,,,,DERM7PT
+328,Fbl022,,,nevus,,,female,lower limbs,,,,DERM7PT
+329,Fbl024,,,nevus,,,female,lower limbs,,,,DERM7PT
+330,Fll023,,,nevus,,,male,back,,,,DERM7PT
+331,Fbl036,,,nevus,,,female,lower limbs,,,,DERM7PT
+332,Fbl038,,,nevus,,,female,back,,,,DERM7PT
+333,Fbl044,,,nevus,,,female,chest,,,,DERM7PT
+334,Fbl048,,,nevus,,,male,acral,,,,DERM7PT
+335,Fbl054,,,nevus,,,female,back,,,,DERM7PT
+336,Fbl056,,,nevus,,,male,chest,,,,DERM7PT
+337,FBL062,,,nevus,,,female,chest,,,,DERM7PT
+338,Fbl064,,,nevus,,,female,abdomen,,,,DERM7PT
+339,Fbl068,,,nevus,,,female,upper limbs,,,,DERM7PT
+340,Fbl072,,,nevus,,,male,lower limbs,,,,DERM7PT
+341,Fbl074,,,nevus,,,male,back,,,,DERM7PT
+342,Fbl076,,,nevus,,,female,back,,,,DERM7PT
+343,Fbl080,,,nevus,,,female,back,,,,DERM7PT
+344,Fbl088,,,nevus,,,female,lower limbs,,,,DERM7PT
+345,Fbl090,,,nevus,,,male,lower limbs,,,,DERM7PT
+346,Fbl092,,,nevus,,,male,head neck,,,,DERM7PT
+347,Fbl094,,,nevus,,,female,upper limbs,,,,DERM7PT
+348,Fbl098,,,nevus,,,female,lower limbs,,,,DERM7PT
+349,Fll035,,,nevus,,,male,back,,,,DERM7PT
+350,Fll037,,,nevus,,,male,back,,,,DERM7PT
+351,Fll039,,,nevus,,,male,back,,,,DERM7PT
+352,Fcl010,,,nevus,,,female,back,,,,DERM7PT
+353,Fcl012,,,nevus,,,female,acral,,,,DERM7PT
+354,Fcl014,,,nevus,,,female,back,,,,DERM7PT
+355,FCL018,,,nevus,,,male,back,,,,DERM7PT
+356,Fll041,,,nevus,,,male,back,,,,DERM7PT
+357,Fcl024,,,nevus,,,female,back,,,,DERM7PT
+358,Fcl028,,,nevus,,,male,back,,,,DERM7PT
+359,Fcl030,,,nevus,,,female,abdomen,,,,DERM7PT
+360,Fcl032,,,nevus,,,female,buttocks,,,,DERM7PT
+361,Fcl034,,,nevus,,,female,back,,,,DERM7PT
+362,Fcl036,,,nevus,,,male,chest,,,,DERM7PT
+363,Fcl038,,,nevus,,,male,abdomen,,,,DERM7PT
+364,Fll043,,,nevus,,,male,back,,,,DERM7PT
+365,Fcl048,,,nevus,,,female,back,,,,DERM7PT
+366,Fcl050,,,nevus,,,male,back,,,,DERM7PT
+367,FCL052,,,nevus,,,male,chest,,,,DERM7PT
+368,FCL066,,,nevus,,,male,back,,,,DERM7PT
+369,Fcl070,,,nevus,,,female,lower limbs,,,,DERM7PT
+370,Fcl076,,,nevus,,,female,back,,,,DERM7PT
+371,Fcl080,,,nevus,,,female,chest,,,,DERM7PT
+372,Fcl090,,,nevus,,,male,abdomen,,,,DERM7PT
+373,Fcl094,,,nevus,,,male,lower limbs,,,,DERM7PT
+374,Fcl096,,,nevus,,,female,chest,,,,DERM7PT
+375,Fcl098,,,nevus,,,male,lower limbs,,,,DERM7PT
+376,Fel002,,,nevus,,,female,back,,,,DERM7PT
+377,Fel016,,,nevus,,,male,abdomen,,,,DERM7PT
+378,Fel018,,,nevus,,,female,lower limbs,,,,DERM7PT
+379,Fel024,,,nevus,,,male,back,,,,DERM7PT
+380,Fel030,,,nevus,,,male,chest,,,,DERM7PT
+381,Fel034,,,nevus,,,female,abdomen,,,,DERM7PT
+382,Fel052,,,nevus,,,male,back,,,,DERM7PT
+383,Fel064,,,nevus,,,female,abdomen,,,,DERM7PT
+384,Fel068,,,nevus,,,female,back,,,,DERM7PT
+385,Fel070,,,nevus,,,female,abdomen,,,,DERM7PT
+386,Fel072,,,nevus,,,male,back,,,,DERM7PT
+387,Fel082,,,nevus,,,male,upper limbs,,,,DERM7PT
+388,Fel084,,,nevus,,,female,lower limbs,,,,DERM7PT
+389,Fel086,,,nevus,,,male,lower limbs,,,,DERM7PT
+390,Fel088,,,nevus,,,male,abdomen,,,,DERM7PT
+391,Fel096,,,nevus,,,female,abdomen,,,,DERM7PT
+392,Fel100,,,nevus,,,male,back,,,,DERM7PT
+393,FFL002,,,nevus,,,male,upper limbs,,,,DERM7PT
+394,FFL004,,,nevus,,,female,back,,,,DERM7PT
+395,FFL006,,,nevus,,,female,chest,,,,DERM7PT
+396,FFL008,,,nevus,,,female,abdomen,,,,DERM7PT
+397,Ffl010,,,nevus,,,male,abdomen,,,,DERM7PT
+398,Ffl014,,,nevus,,,female,abdomen,,,,DERM7PT
+399,Ffl016,,,nevus,,,female,abdomen,,,,DERM7PT
+400,FFL032,,,nevus,,,male,back,,,,DERM7PT
+401,Ffl066,,,nevus,,,male,acral,,,,DERM7PT
+402,Ffl078,,,nevus,,,female,chest,,,,DERM7PT
+403,Ffl082,,,nevus,,,female,back,,,,DERM7PT
+404,Ffl100,,,nevus,,,female,upper limbs,,,,DERM7PT
+405,Fdl002,,,nevus,,,female,lower limbs,,,,DERM7PT
+406,Fdl020,,,nevus,,,male,lower limbs,,,,DERM7PT
+407,Fll065,,,nevus,,,female,back,,,,DERM7PT
+408,Fdl028,,,nevus,,,male,head neck,,,,DERM7PT
+409,Fdl030,,,nevus,,,female,head neck,,,,DERM7PT
+410,Fdl054,,,nevus,,,female,upper limbs,,,,DERM7PT
+411,Fll083,,,nevus,,,female,abdomen,,,,DERM7PT
+412,Fgl002,,,nevus,,,female,chest,,,,DERM7PT
+413,Gcl073,,,nevus,,,female,abdomen,,,,DERM7PT
+414,Ggl024,,,nevus,,,male,back,,,,DERM7PT
+415,Ggl052,,,nevus,,,male,back,,,,DERM7PT
+416,Ggl060,,,nevus,,,male,chest,,,,DERM7PT
+417,Ggl062,,,nevus,,,male,chest,,,,DERM7PT
+418,Ggl034,,,nevus,,,male,acral,,,,DERM7PT
+419,Ggl074,,,nevus,,,male,lower limbs,,,,DERM7PT
+420,Ggl076,,,nevus,,,male,chest,,,,DERM7PT
+421,Ggl078,,,nevus,,,male,back,,,,DERM7PT
+422,Ggl088,,,nevus,,,female,chest,,,,DERM7PT
+423,Fgl036,,,nevus,,,female,back,,,,DERM7PT
+424,Fgl008,,,nevus,,,male,back,,,,DERM7PT
+425,Fgl010,,,nevus,,,male,back,,,,DERM7PT
+426,Fgl012,,,nevus,,,male,back,,,,DERM7PT
+427,Fgl014,,,nevus,,,male,back,,,,DERM7PT
+428,Fll087,,,nevus,,,female,upper limbs,,,,DERM7PT
+429,Fgl005,,,nevus,,,female,buttocks,,,,DERM7PT
+430,Fll091,,,nevus,,,male,back,,,,DERM7PT
+431,Fgl042,,,nevus,,,male,back,,,,DERM7PT
+432,Fgl047,,,nevus,,,male,back,,,,DERM7PT
+433,Fgl051,,,nevus,,,male,chest,,,,DERM7PT
+434,Fgl055,,,nevus,,,female,abdomen,,,,DERM7PT
+435,Fgl068,,,nevus,,,male,back,,,,DERM7PT
+436,Fgl072,,,nevus,,,male,back,,,,DERM7PT
+437,Fgl078,,,nevus,,,male,back,,,,DERM7PT
+438,Fhl030,,,nevus,,,female,acral,,,,DERM7PT
+439,Fhl032,,,nevus,,,female,upper limbs,,,,DERM7PT
+440,Fhl034,,,nevus,,,female,abdomen,,,,DERM7PT
+441,Fhl038,,,nevus,,,male,lower limbs,,,,DERM7PT
+442,Fhl040,,,nevus,,,female,lower limbs,,,,DERM7PT
+443,Fhl042,,,nevus,,,male,back,,,,DERM7PT
+444,Fhl064,,,nevus,,,male,back,,,,DERM7PT
+445,Fhl066,,,nevus,,,male,back,,,,DERM7PT
+446,Fhl070,,,nevus,,,male,abdomen,,,,DERM7PT
+447,Fhl072,,,nevus,,,male,back,,,,DERM7PT
+448,Fhl074,,,nevus,,,male,back,,,,DERM7PT
+449,Fhl076,,,nevus,,,male,abdomen,,,,DERM7PT
+450,Fhl078,,,nevus,,,male,back,,,,DERM7PT
+451,Fhl080,,,nevus,,,male,back,,,,DERM7PT
+452,Fhl082,,,nevus,,,male,back,,,,DERM7PT
+453,Fhl084,,,nevus,,,male,abdomen,,,,DERM7PT
+454,Fhl086,,,nevus,,,male,abdomen,,,,DERM7PT
+455,Fhl088,,,nevus,,,male,back,,,,DERM7PT
+456,Fhl090,,,nevus,,,male,abdomen,,,,DERM7PT
+457,Fhl092,,,nevus,,,male,back,,,,DERM7PT
+458,Fhl094,,,nevus,,,male,abdomen,,,,DERM7PT
+459,Fhl096,,,nevus,,,male,back,,,,DERM7PT
+460,Fhl098,,,nevus,,,male,back,,,,DERM7PT
+461,Fhl100,,,nevus,,,male,back,,,,DERM7PT
+462,Fll142,,,nevus,,,female,back,,,,DERM7PT
+463,Fil062,,,nevus,,,female,back,,,,DERM7PT
+464,Fml010,,,nevus,,,female,back,,,,DERM7PT
+465,Fml020,,,nevus,,,female,abdomen,,,,DERM7PT
+466,Fil088,,,nevus,,,female,lower limbs,,,,DERM7PT
+467,Fil094,,,nevus,,,male,back,,,,DERM7PT
+468,Nml067,,,nevus,,,male,abdomen,,,,DERM7PT
+469,Nll024,,,nevus,,,female,abdomen,,,,DERM7PT
+470,Nel012,,,nevus,,,male,chest,,,,DERM7PT
+471,Nfl034,,,nevus,,,male,abdomen,,,,DERM7PT
+472,Ngl086,,,nevus,,,male,chest,,,,DERM7PT
+473,Ngl098,,,nevus,,,female,abdomen,,,,DERM7PT
+474,Nml045,,,nevus,,,male,upper limbs,,,,DERM7PT
+475,Nml047,,,nevus,,,male,back,,,,DERM7PT
+476,Acl285,,,nevus,,,male,back,,,,DERM7PT
+477,Gal216,,,nevus,,,female,upper limbs,,,,DERM7PT
+478,Gal218,,,nevus,,,female,upper limbs,,,,DERM7PT
+479,FAL022,,,nevus,,,male,back,,,,DERM7PT
+480,Fdl062,,,nevus,,,male,abdomen,,,,DERM7PT
+481,Gdl100,,,nevus,,,male,back,,,,DERM7PT
+482,Ggl090,,,nevus,,,female,upper limbs,,,,DERM7PT
+483,Ncl027,,,nevus,,,female,lower limbs,,,,DERM7PT
+484,Ncl071,,,nevus,,,male,abdomen,,,,DERM7PT
+485,Ncl100,,,nevus,,,male,back,,,,DERM7PT
+486,Nel008,,,nevus,,,female,abdomen,,,,DERM7PT
+487,Nel010,,,nevus,,,female,chest,,,,DERM7PT
+488,Nfl036,,,nevus,,,female,lower limbs,,,,DERM7PT
+489,Nml039,,,nevus,,,male,abdomen,,,,DERM7PT
+490,Abl193,,,nevus,,,male,back,,,,DERM7PT
+491,Adl377,,,nevus,,,male,back,,,,DERM7PT
+492,Ael475,,,nevus,,,male,lower limbs,,,,DERM7PT
+493,Abl183,,,nevus,,,male,lower limbs,,,,DERM7PT
+494,Gal062,,,nevus,,,male,upper limbs,,,,DERM7PT
+495,Ffl062,,,nevus,,,female,back,,,,DERM7PT
+496,Ffl096,,,nevus,,,female,back,,,,DERM7PT
+497,FDL016,,,nevus,,,female,upper limbs,,,,DERM7PT
+498,FDL022,,,nevus,,,female,lower limbs,,,,DERM7PT
+499,Ggl002,,,nevus,,,male,lower limbs,,,,DERM7PT
+500,Nbl080,,,nevus,,,male,head neck,,,,DERM7PT
+501,Nel005,,,nevus,,,female,back,,,,DERM7PT
+502,Nfl042,,,nevus,,,female,upper limbs,,,,DERM7PT
+503,Nfl044,,,nevus,,,female,head neck,,,,DERM7PT
+504,Nll038,,,nevus,,,male,head neck,,,,DERM7PT
+505,Nll040,,,nevus,,,female,head neck,,,,DERM7PT
+506,Nll048,,,nevus,,,female,upper limbs,,,,DERM7PT
+507,Nll050,,,nevus,,,female,chest,,,,DERM7PT
+508,NLL052,,,nevus,,,male,upper limbs,,,,DERM7PT
+509,Nll056,,,nevus,,,male,abdomen,,,,DERM7PT
+510,Nll058,,,nevus,,,female,abdomen,,,,DERM7PT
+511,Nll088,,,nevus,,,female,head neck,,,,DERM7PT
+512,NML032,,,nevus,,,female,upper limbs,,,,DERM7PT
+513,Nml051,,,nevus,,,male,back,,,,DERM7PT
+514,Nml063,,,nevus,,,female,head neck,,,,DERM7PT
+515,Nml065,,,nevus,,,male,abdomen,,,,DERM7PT
+516,Abl189,,,nevus,,,female,back,,,,DERM7PT
+517,Acl203,,,nevus,,,female,abdomen,,,,DERM7PT
+518,Acl263,,,nevus,,,female,chest,,,,DERM7PT
+519,Adl331,,,nevus,,,female,abdomen,,,,DERM7PT
+520,Adl337bis,,,nevus,,,female,chest,,,,DERM7PT
+521,Ael521,,,nevus,,,female,abdomen,,,,DERM7PT
+522,gzl68,,,nevus,,,male,head neck,,,,DERM7PT
+523,gzl52,,,nevus,,,male,chest,,,,DERM7PT
+524,Gal033,,,nevus,,,male,abdomen,,,,DERM7PT
+525,Fbl030,,,nevus,,,female,upper limbs,,,,DERM7PT
+526,Ffl042,,,nevus,,,female,chest,,,,DERM7PT
+527,Ggl008,,,nevus,,,female,lower limbs,,,,DERM7PT
+528,Ggl042,,,nevus,,,female,head neck,,,,DERM7PT
+529,Ggl044,,,nevus,,,male,abdomen,,,,DERM7PT
+530,Fgl035,,,nevus,,,female,back,,,,DERM7PT
+531,Fgl020,,,nevus,,,male,chest,,,,DERM7PT
+532,Fll089,,,nevus,,,male,back,,,,DERM7PT
+533,Nfl004,,,dermatofibroma,,,female,lower limbs,,,,DERM7PT
+534,Aal014,,,dermatofibroma,,,female,lower limbs,,,,DERM7PT
+535,Aal018,,,dermatofibroma,,,female,upper limbs,,,,DERM7PT
+536,Aal020,,,dermatofibroma,,,male,lower limbs,,,,DERM7PT
+537,Abl197,,,dermatofibroma,,,female,lower limbs,,,,DERM7PT
+538,Acl209,,,dermatofibroma,,,female,upper limbs,,,,DERM7PT
+539,Acl211,,,dermatofibroma,,,male,lower limbs,,,,DERM7PT
+540,Aal024,,,dermatofibroma,,,male,upper limbs,,,,DERM7PT
+541,Acl231,,,dermatofibroma,,,female,lower limbs,,,,DERM7PT
+542,Acl233,,,dermatofibroma,,,female,buttocks,,,,DERM7PT
+543,Aal028,,,dermatofibroma,,,male,upper limbs,,,,DERM7PT
+544,Aal030,,,dermatofibroma,,,female,upper limbs,,,,DERM7PT
+545,Aal038,,,dermatofibroma,,,female,upper limbs,,,,DERM7PT
+546,Adl373,,,dermatofibroma,,,female,upper limbs,,,,DERM7PT
+547,Ael527,,,dermatofibroma,,,male,back,,,,DERM7PT
+548,Gal226,,,dermatofibroma,,,female,upper limbs,,,,DERM7PT
+549,Ggl048,,,dermatofibroma,,,female,upper limbs,,,,DERM7PT
+550,Ggl056,,,dermatofibroma,,,female,lower limbs,,,,DERM7PT
+551,Ggl084,,,dermatofibroma,,,male,lower limbs,,,,DERM7PT
+552,Fhl044,,,dermatofibroma,,,female,lower limbs,,,,DERM7PT
+553,Ndl089,,,lentigo,,,female,back,,,,DERM7PT
+554,Ndl100,,,lentigo,,,female,back,,,,DERM7PT
+555,Adl383,,,lentigo,,,female,chest,,,,DERM7PT
+556,Adl385,,,lentigo,,,male,upper limbs,,,,DERM7PT
+557,Adl387bis,,,lentigo,,,male,abdomen,,,,DERM7PT
+558,Ael415,,,lentigo,,,female,head neck,,,,DERM7PT
+559,gzl60,,,lentigo,,,male,back,,,,DERM7PT
+560,gzl48,,,lentigo,,,female,head neck,,,,DERM7PT
+561,Gal169,,,lentigo,,,male,head neck,,,,DERM7PT
+562,Gal171,,,lentigo,,,female,head neck,,,,DERM7PT
+563,Ggl070,,,lentigo,,,female,back,,,,DERM7PT
+564,Ggl072,,,lentigo,,,male,upper limbs,,,,DERM7PT
+565,Fhl018,,,lentigo,,,female,chest,,,,DERM7PT
+566,Fil064,,,lentigo,,,male,abdomen,,,,DERM7PT
+567,Fml026,,,lentigo,,,male,upper limbs,,,,DERM7PT
+568,newl006,,,lentigo,,,female,upper limbs,,,,DERM7PT
+569,newl008,,,lentigo,,,male,upper limbs,,,,DERM7PT
+570,newl010,,,lentigo,,,male,back,,,,DERM7PT
+571,newl012,,,lentigo,,,female,head neck,,,,DERM7PT
+572,newl018,,,lentigo,,,male,upper limbs,,,,DERM7PT
+573,newl020,,,lentigo,,,male,upper limbs,,,,DERM7PT
+574,newl022,,,lentigo,,,male,upper limbs,,,,DERM7PT
+575,newl024,,,lentigo,,,male,upper limbs,,,,DERM7PT
+576,newl026,,,lentigo,,,male,upper limbs,,,,DERM7PT
+577,Nal020,,,melanoma,,,female,upper limbs,,,,DERM7PT
+578,Nal022,,,melanoma,,,female,lower limbs,,,,DERM7PT
+579,Nal037,,,melanoma,,,male,chest,,,,DERM7PT
+580,Nal044,,,melanoma,,,male,upper limbs,,,,DERM7PT
+581,Nal047,,,melanoma,,,female,lower limbs,,,,DERM7PT
+582,Nal066,,,melanoma,,,male,head neck,,,,DERM7PT
+583,Nal073,,,melanoma,,,male,back,,,,DERM7PT
+584,Nal075,,,melanoma,,,female,upper limbs,,,,DERM7PT
+585,Nal077,,,melanoma,,,male,back,,,,DERM7PT
+586,Nal080,,,melanoma,,,male,head neck,,,,DERM7PT
+587,Nal082,,,melanoma,,,male,head neck,,,,DERM7PT
+588,Nal084,,,melanoma,,,male,abdomen,,,,DERM7PT
+589,Nal088,,,melanoma,,,female,head neck,,,,DERM7PT
+590,Nal090,,,melanoma,,,female,head neck,,,,DERM7PT
+591,Nal052,,,melanoma,,,male,head neck,,,,DERM7PT
+592,Nal099,,,melanoma,,,male,lower limbs,,,,DERM7PT
+593,Nbl001,,,melanoma,,,female,back,,,,DERM7PT
+594,Nbl007,,,melanoma,,,male,head neck,,,,DERM7PT
+595,Nbl010,,,melanoma,,,male,abdomen,,,,DERM7PT
+596,Nbl013,,,melanoma,,,male,abdomen,,,,DERM7PT
+597,Nbl015,,,melanoma,,,female,back,,,,DERM7PT
+598,Nbl022,,,melanoma,,,female,back,,,,DERM7PT
+599,Nbl025,,,melanoma,,,female,head neck,,,,DERM7PT
+600,Nbl031,,,melanoma,,,male,abdomen,,,,DERM7PT
+601,Nfl054,,,melanoma,,,male,head neck,,,,DERM7PT
+602,Ngl002,,,melanoma,,,male,chest,,,,DERM7PT
+603,NGL010,,,melanoma,,,male,abdomen,,,,DERM7PT
+604,Ngl062,,,melanoma,,,female,back,,,,DERM7PT
+605,Ngl068,,,melanoma,,,male,chest,,,,DERM7PT
+606,Ngl084,,,melanoma,,,male,head neck,,,,DERM7PT
+607,Nhl009,,,melanoma,,,male,chest,,,,DERM7PT
+608,Nil031,,,melanoma,,,male,upper limbs,,,,DERM7PT
+609,Nil080,,,melanoma,,,male,lower limbs,,,,DERM7PT
+610,Nil084,,,melanoma,,,male,back,,,,DERM7PT
+611,Adl301,,,melanoma,,,male,back,,,,DERM7PT
+612,Ael496,,,melanoma,,,male,back,,,,DERM7PT
+613,gzl20,,,melanoma,,,female,back,,,,DERM7PT
+614,gzl28,,,melanoma,,,male,lower limbs,,,,DERM7PT
+615,Gal240,,,melanoma,,,male,back,,,,DERM7PT
+616,Gal039,,,melanoma,,,female,upper limbs,,,,DERM7PT
+617,Gal185,,,melanoma,,,female,head neck,,,,DERM7PT
+618,FBL026,,,melanoma,,,female,lower limbs,,,,DERM7PT
+619,Fbl028,,,melanoma,,,female,upper limbs,,,,DERM7PT
+620,Fcl022,,,melanoma,,,female,head neck,,,,DERM7PT
+621,Fcl040,,,melanoma,,,male,back,,,,DERM7PT
+622,Fcl044,,,melanoma,,,male,upper limbs,,,,DERM7PT
+623,FCL058,,,melanoma,,,male,back,,,,DERM7PT
+624,FCL074,,,melanoma,,,female,upper limbs,,,,DERM7PT
+625,Ffl080,,,melanoma,,,female,lower limbs,,,,DERM7PT
+626,Fdl014,,,melanoma,,,male,chest,,,,DERM7PT
+627,FDL036,,,melanoma,,,female,lower limbs,,,,DERM7PT
+628,Gcl003,,,melanoma,,,female,back,,,,DERM7PT
+629,Gdl037,,,melanoma,,,male,lower limbs,,,,DERM7PT
+630,Ggl036,,,melanoma,,,male,acral,,,,DERM7PT
+631,Ggl068,,,melanoma,,,female,back,,,,DERM7PT
+632,Fll085,,,melanoma,,,female,buttocks,,,,DERM7PT
+633,Fgl018,,,melanoma,,,male,lower limbs,,,,DERM7PT
+634,Fgl029,,,melanoma,,,female,head neck,,,,DERM7PT
+635,Fgl057,,,melanoma,,,female,back,,,,DERM7PT
+636,Fil004,,,melanoma,,,male,abdomen,,,,DERM7PT
+637,Fll122,,,melanoma,,,female,buttocks,,,,DERM7PT
+638,Fil052,,,melanoma,,,male,back,,,,DERM7PT
+639,Fil070,,,melanoma,,,female,abdomen,,,,DERM7PT
+640,newl053,,,melanoma,,,male,head neck,,,,DERM7PT
+641,Nal005,,,melanoma,,,female,back,,,,DERM7PT
+642,Nal018,,,melanoma,,,female,chest,,,,DERM7PT
+643,Nal025,,,melanoma,,,male,back,,,,DERM7PT
+644,Nal033,,,melanoma,,,female,back,,,,DERM7PT
+645,Nal035,,,melanoma,,,female,upper limbs,,,,DERM7PT
+646,Nal049,,,melanoma,,,female,abdomen,,,,DERM7PT
+647,Nal057,,,melanoma,,,female,lower limbs,,,,DERM7PT
+648,Nal058,,,melanoma,,,male,head neck,,,,DERM7PT
+649,Nal064,,,melanoma,,,female,back,,,,DERM7PT
+650,Nal070,,,melanoma,,,female,lower limbs,,,,DERM7PT
+651,Nal086,,,melanoma,,,female,lower limbs,,,,DERM7PT
+652,Nal091,,,melanoma,,,female,abdomen,,,,DERM7PT
+653,nal095,,,melanoma,,,female,lower limbs,,,,DERM7PT
+654,Nal097,,,melanoma,,,male,abdomen,,,,DERM7PT
+655,Nbl004,,,melanoma,,,male,head neck,,,,DERM7PT
+656,Nbl006,,,melanoma,,,female,back,,,,DERM7PT
+657,Nbl017,,,melanoma,,,male,chest,,,,DERM7PT
+658,Nbl019,,,melanoma,,,female,chest,,,,DERM7PT
+659,Nbl028,,,melanoma,,,female,head neck,,,,DERM7PT
+660,Nbl030,,,melanoma,,,female,back,,,,DERM7PT
+661,Nbl034,,,melanoma,,,male,back,,,,DERM7PT
+662,Nfl063,,,melanoma,,,female,back,,,,DERM7PT
+663,nfl070,,,melanoma,,,female,upper limbs,,,,DERM7PT
+664,nfl072,,,melanoma,,,female,upper limbs,,,,DERM7PT
+665,Ngl008,,,melanoma,,,male,back,,,,DERM7PT
+666,Ngl013,,,melanoma,,,female,lower limbs,,,,DERM7PT
+667,Ngl017,,,melanoma,,,female,chest,,,,DERM7PT
+668,Ngl019,,,melanoma,,,male,back,,,,DERM7PT
+669,Ngl021,,,melanoma,,,female,lower limbs,,,,DERM7PT
+670,Ngl027,,,melanoma,,,female,lower limbs,,,,DERM7PT
+671,Ngl039,,,melanoma,,,male,lower limbs,,,,DERM7PT
+672,Ngl055,,,melanoma,,,female,chest,,,,DERM7PT
+673,Ngl064,,,melanoma,,,female,head neck,,,,DERM7PT
+674,Ngl100,,,melanoma,,,female,upper limbs,,,,DERM7PT
+675,Nil066,,,melanoma,,,male,back,,,,DERM7PT
+676,Nil070,,,melanoma,,,female,back,,,,DERM7PT
+677,Nil076,,,melanoma,,,female,upper limbs,,,,DERM7PT
+678,Nil078,,,melanoma,,,male,chest,,,,DERM7PT
+679,Nil088,,,melanoma,,,female,upper limbs,,,,DERM7PT
+680,Nil096,,,melanoma,,,male,lower limbs,,,,DERM7PT
+681,Nil100,,,melanoma,,,male,chest,,,,DERM7PT
+682,Nil103,,,melanoma,,,female,back,,,,DERM7PT
+683,Nll002,,,melanoma,,,female,upper limbs,,,,DERM7PT
+684,Nll004,,,melanoma,,,female,back,,,,DERM7PT
+685,Nml022,,,melanoma,,,female,lower limbs,,,,DERM7PT
+686,Nml077,,,melanoma,,,female,back,,,,DERM7PT
+687,Nml079,,,melanoma,,,male,lower limbs,,,,DERM7PT
+688,Adl305,,,melanoma,,,female,lower limbs,,,,DERM7PT
+689,Adl313,,,melanoma,,,male,back,,,,DERM7PT
+690,Ael490,,,melanoma,,,female,upper limbs,,,,DERM7PT
+691,Ael492,,,melanoma,,,female,head neck,,,,DERM7PT
+692,Ael504,,,melanoma,,,male,back,,,,DERM7PT
+693,gzl04,,,melanoma,,,female,lower limbs,,,,DERM7PT
+694,gzl16,,,melanoma,,,female,back,,,,DERM7PT
+695,gzl76,,,melanoma,,,female,head neck,,,,DERM7PT
+696,gzl50,,,melanoma,,,female,back,,,,DERM7PT
+697,Gal108,,,melanoma,,,male,lower limbs,,,,DERM7PT
+698,Gal113,,,melanoma,,,male,lower limbs,,,,DERM7PT
+699,Gal146,,,melanoma,,,female,upper limbs,,,,DERM7PT
+700,Gal257,,,melanoma,,,female,chest,,,,DERM7PT
+701,Gal211,,,melanoma,,,female,chest,,,,DERM7PT
+702,FAL066,,,melanoma,,,male,upper limbs,,,,DERM7PT
+703,Fal078,,,melanoma,,,female,upper limbs,,,,DERM7PT
+704,FBL046,,,melanoma,,,female,abdomen,,,,DERM7PT
+705,Fbl050,,,melanoma,,,male,back,,,,DERM7PT
+706,FBL058,,,melanoma,,,female,back,,,,DERM7PT
+707,Fll027,,,melanoma,,,female,lower limbs,,,,DERM7PT
+708,Fbl082,,,melanoma,,,female,lower limbs,,,,DERM7PT
+709,Fcl026,,,melanoma,,,male,back,,,,DERM7PT
+710,Fcl060,,,melanoma,,,female,upper limbs,,,,DERM7PT
+711,Fll045,,,melanoma,,,male,back,,,,DERM7PT
+712,Fcl100,,,melanoma,,,female,chest,,,,DERM7PT
+713,Fel098,,,melanoma,,,female,lower limbs,,,,DERM7PT
+714,FFL020,,,melanoma,,,female,lower limbs,,,,DERM7PT
+715,Ffl092,,,melanoma,,,female,lower limbs,,,,DERM7PT
+716,Ffl094,,,melanoma,,,male,chest,,,,DERM7PT
+717,Fll071,,,melanoma,,,male,lower limbs,,,,DERM7PT
+718,Fdl056,,,melanoma,,,female,lower limbs,,,,DERM7PT
+719,Gbl009,,,melanoma,,,male,back,,,,DERM7PT
+720,Gcl094,,,melanoma,,,female,head neck,,,,DERM7PT
+721,Gdl014,,,melanoma,,,female,lower limbs,,,,DERM7PT
+722,Gdl021,,,melanoma,,,female,abdomen,,,,DERM7PT
+723,Gdl025,,,melanoma,,,male,back,,,,DERM7PT
+724,Ggl050,,,melanoma,,,female,chest,,,,DERM7PT
+725,Ggl058,,,melanoma,,,male,chest,,,,DERM7PT
+726,Fll097,,,melanoma,,,male,back,,,,DERM7PT
+727,Fgl082,,,melanoma,,,female,lower limbs,,,,DERM7PT
+728,Fgl083,,,melanoma,,,female,lower limbs,,,,DERM7PT
+729,Fhl046,,,melanoma,,,male,lower limbs,,,,DERM7PT
+730,Fll108,,,melanoma,,,male,back,,,,DERM7PT
+731,Fil006,,,melanoma,,,female,lower limbs,,,,DERM7PT
+732,Fll116,,,melanoma,,,male,lower limbs,,,,DERM7PT
+733,Fll118,,,melanoma,,,female,back,,,,DERM7PT
+734,Fil032,,,melanoma,,,female,lower limbs,,,,DERM7PT
+735,Fll132,,,melanoma,,,female,abdomen,,,,DERM7PT
+736,newl014,,,melanoma,,,female,upper limbs,,,,DERM7PT
+737,newl032,,,melanoma,,,male,head neck,,,,DERM7PT
+738,newl043,,,melanoma,,,male,abdomen,,,,DERM7PT
+739,newl047,,,melanoma,,,male,back,,,,DERM7PT
+740,newl049,,,melanoma,,,female,lower limbs,,,,DERM7PT
+741,newl051,,,melanoma,,,male,lower limbs,,,,DERM7PT
+742,newl059,,,melanoma,,,male,back,,,,DERM7PT
+743,Nal002,,,melanoma,,,male,acral,,,,DERM7PT
+744,Nal008,,,melanoma,,,male,lower limbs,,,,DERM7PT
+745,Nbl059,,,melanoma,,,male,chest,,,,DERM7PT
+746,Nbl060,,,melanoma,,,male,lower limbs,,,,DERM7PT
+747,Nbl063,,,melanoma,,,male,back,,,,DERM7PT
+748,Nbl065,,,melanoma,,,male,lower limbs,,,,DERM7PT
+749,Ngl004,,,melanoma,,,female,lower limbs,,,,DERM7PT
+750,NGL025,,,melanoma,,,female,lower limbs,,,,DERM7PT
+751,Ngl041,,,melanoma,,,female,lower limbs,,,,DERM7PT
+752,Ngl066,,,melanoma,,,male,back,,,,DERM7PT
+753,Ngl088,,,melanoma,,,male,lower limbs,,,,DERM7PT
+754,Nil064,,,melanoma,,,female,chest,,,,DERM7PT
+755,Nil068,,,melanoma,,,male,upper limbs,,,,DERM7PT
+756,Nil082,,,melanoma,,,male,back,,,,DERM7PT
+757,Nil090,,,melanoma,,,female,upper limbs,,,,DERM7PT
+758,Nil093,,,melanoma,,,female,lower limbs,,,,DERM7PT
+759,nll014,,,melanoma,,,male,abdomen,,,,DERM7PT
+760,Nml024,,,melanoma,,,male,lower limbs,,,,DERM7PT
+761,Nml073,,,melanoma,,,male,back,,,,DERM7PT
+762,Aal002,,,melanoma,,,male,back,,,,DERM7PT
+763,Aal002bis,,,melanoma,,,male,upper limbs,,,,DERM7PT
+764,Ael494,,,melanoma,,,female,abdomen,,,,DERM7PT
+765,gzl12,,,melanoma,,,male,back,,,,DERM7PT
+766,gzl26,,,melanoma,,,male,abdomen,,,,DERM7PT
+767,Gal220,,,melanoma,,,female,upper limbs,,,,DERM7PT
+768,Gal262,,,melanoma,,,male,back,,,,DERM7PT
+769,Gal209,,,melanoma,,,male,chest,,,,DERM7PT
+770,FAL006,,,melanoma,,,male,back,,,,DERM7PT
+771,FAL094,,,melanoma,,,male,back,,,,DERM7PT
+772,FBL020,,,melanoma,,,female,chest,,,,DERM7PT
+773,FCL056,,,melanoma,,,female,back,,,,DERM7PT
+774,Fll047,,,melanoma,,,male,lower limbs,,,,DERM7PT
+775,FCL084,,,melanoma,,,female,upper limbs,,,,DERM7PT
+776,Fcl092,,,melanoma,,,female,upper limbs,,,,DERM7PT
+777,FFL068,,,melanoma,,,female,lower limbs,,,,DERM7PT
+778,Fll069,,,melanoma,,,female,lower limbs,,,,DERM7PT
+779,Gbl014,,,melanoma,,,female,lower limbs,,,,DERM7PT
+780,Gcl058,,,melanoma,,,male,back,,,,DERM7PT
+781,Gdl012,,,melanoma,,,female,lower limbs,,,,DERM7PT
+782,Gdl023,,,melanoma,,,female,lower limbs,,,,DERM7PT
+783,Gdl034,,,melanoma,,,female,lower limbs,,,,DERM7PT
+784,Gdl089,,,melanoma,,,female,lower limbs,,,,DERM7PT
+785,Ggl040,,,melanoma,,,female,head neck,,,,DERM7PT
+786,Ggl054,,,melanoma,,,male,back,,,,DERM7PT
+787,Fgl006,,,melanoma,,,female,lower limbs,,,,DERM7PT
+788,Fgl061,,,melanoma,,,male,upper limbs,,,,DERM7PT
+789,Fil010,,,melanoma,,,female,lower limbs,,,,DERM7PT
+790,Fll126,,,melanoma,,,female,lower limbs,,,,DERM7PT
+791,Fll128,,,melanoma,,,female,lower limbs,,,,DERM7PT
+792,Fll130,,,melanoma,,,female,chest,,,,DERM7PT
+793,Fll136,,,melanoma,,,male,back,,,,DERM7PT
+794,newl045,,,melanoma,,,male,back,,,,DERM7PT
+795,newl055,,,melanoma,,,female,lower limbs,,,,DERM7PT
+796,Nbl037,,,melanoma,,,female,lower limbs,,,,DERM7PT
+797,Nbl040,,,melanoma,,,female,back,,,,DERM7PT
+798,Nbl044,,,melanoma,,,female,lower limbs,,,,DERM7PT
+799,Nbl048,,,melanoma,,,male,lower limbs,,,,DERM7PT
+800,NBL049,,,melanoma,,,male,genital areas,,,,DERM7PT
+801,Nbl054,,,melanoma,,,female,chest,,,,DERM7PT
+802,Nbl074,,,melanoma,,,female,lower limbs,,,,DERM7PT
+803,Ngl006,,,melanoma,,,male,upper limbs,,,,DERM7PT
+804,Ngl057,,,melanoma,,,male,chest,,,,DERM7PT
+805,Ngl015,,,melanoma,,,female,chest,,,,DERM7PT
+806,Nhl017,,,melanoma,,,male,back,,,,DERM7PT
+807,Nil062,,,melanoma,,,male,back,,,,DERM7PT
+808,Nil086,,,melanoma,,,female,back,,,,DERM7PT
+809,Nml020,,,melanoma,,,male,chest,,,,DERM7PT
+810,Nml081,,,melanoma,,,female,back,,,,DERM7PT
+811,Ael498,,,melanoma,,,male,back,,,,DERM7PT
+812,Ael514,,,melanoma,,,female,abdomen,,,,DERM7PT
+813,gzl64,,,melanoma,,,male,lower limbs,,,,DERM7PT
+814,gzl78,,,melanoma,,,female,buttocks,,,,DERM7PT
+815,FCL054,,,melanoma,,,female,upper limbs,,,,DERM7PT
+816,Fcl068,,,melanoma,,,female,lower limbs,,,,DERM7PT
+817,FDL052,,,melanoma,,,male,chest,,,,DERM7PT
+818,Gcl039,,,melanoma,,,female,lower limbs,,,,DERM7PT
+819,Gcl052,,,melanoma,,,male,chest,,,,DERM7PT
+820,Fgl044,,,melanoma,,,male,back,,,,DERM7PT
+821,Fil008,,,melanoma,,,female,lower limbs,,,,DERM7PT
+822,Fil040,,,melanoma,,,female,upper limbs,,,,DERM7PT
+823,newl036,,,melanoma,,,male,upper limbs,,,,DERM7PT
+824,NBL041,,,melanoma,,,male,chest,,,,DERM7PT
+825,Nbl046,,,melanoma,,,female,lower limbs,,,,DERM7PT
+826,Fcl016,,,melanoma,,,male,acral,,,,DERM7PT
+827,Nbl042,,,melanoma,,,male,chest,,,,DERM7PT
+828,Ndl091,,,melanosis,,,female,genital areas,,,,DERM7PT
+829,Ndl094,,,melanosis,,,male,head neck,,,,DERM7PT
+830,Nfl038,,,melanosis,,,male,head neck,,,,DERM7PT
+831,gzl72,,,melanosis,,,female,head neck,,,,DERM7PT
+832,Gal008,,,melanosis,,,female,head neck,,,,DERM7PT
+833,Fgl059,,,melanosis,,,female,genital areas,,,,DERM7PT
+834,Fhl002,,,melanosis,,,female,genital areas,,,,DERM7PT
+835,Fhl004,,,melanosis,,,male,genital areas,,,,DERM7PT
+836,Fhl006,,,melanosis,,,female,genital areas,,,,DERM7PT
+837,Fhl008,,,melanosis,,,male,head neck,,,,DERM7PT
+838,Fhl010,,,melanosis,,,female,head neck,,,,DERM7PT
+839,Fhl012,,,melanosis,,,female,genital areas,,,,DERM7PT
+840,Fhl014,,,melanosis,,,female,head neck,,,,DERM7PT
+841,Fhl016,,,melanosis,,,male,genital areas,,,,DERM7PT
+842,Fhl022,,,melanosis,,,female,head neck,,,,DERM7PT
+843,Fhl028,,,melanosis,,,female,head neck,,,,DERM7PT
+844,Nel050,,,miscellaneous,,,female,lower limbs,,,,DERM7PT
+845,FBL066,,,miscellaneous,,,female,lower limbs,,,,DERM7PT
+846,Ffl026,,,miscellaneous,,,female,chest,,,,DERM7PT
+847,FDL068,,,miscellaneous,,,male,lower limbs,,,,DERM7PT
+848,newl002,,,miscellaneous,,,male,head neck,,,,DERM7PT
+849,newl028,,,miscellaneous,,,male,head neck,,,,DERM7PT
+850,newl041,,,miscellaneous,,,female,lower limbs,,,,DERM7PT
+851,Nel051,,,miscellaneous,,,female,lower limbs,,,,DERM7PT
+852,ndl085,,,nevus,,,male,back,,,,DERM7PT
+853,Nfl074,,,nevus,,,female,back,,,,DERM7PT
+854,Nml004,,,nevus,,,female,abdomen,,,,DERM7PT
+855,Nml071,,,nevus,,,female,chest,,,,DERM7PT
+856,gzl82,,,nevus,,,male,back,,,,DERM7PT
+857,Fel092,,,nevus,,,female,abdomen,,,,DERM7PT
+858,Ndl075,,,nevus,,,male,upper limbs,,,,DERM7PT
+859,Nbl088,,,nevus,,,female,lower limbs,,,,DERM7PT
+860,Nbl100,,,nevus,,,male,lower limbs,,,,DERM7PT
+861,Ncl020,,,nevus,,,female,lower limbs,,,,DERM7PT
+862,Ncl032,,,nevus,,,male,lower limbs,,,,DERM7PT
+863,Ncl078,,,nevus,,,male,lower limbs,,,,DERM7PT
+864,Ncl093,,,nevus,,,female,lower limbs,,,,DERM7PT
+865,Ncl095,,,nevus,,,male,abdomen,,,,DERM7PT
+866,Ndl046,,,nevus,,,male,head neck,,,,DERM7PT
+867,Ndl050,,,nevus,,,female,buttocks,,,,DERM7PT
+868,Ndl052,,,nevus,,,female,upper limbs,,,,DERM7PT
+869,Ndl054,,,nevus,,,female,chest,,,,DERM7PT
+870,Ndl056,,,nevus,,,female,lower limbs,,,,DERM7PT
+871,Ndl058,,,nevus,,,male,lower limbs,,,,DERM7PT
+872,Ndl060,,,nevus,,,female,buttocks,,,,DERM7PT
+873,Ndl061,,,nevus,,,male,head neck,,,,DERM7PT
+874,NDL063,,,nevus,,,female,lower limbs,,,,DERM7PT
+875,Ndl068,,,nevus,,,female,lower limbs,,,,DERM7PT
+876,Ndl069,,,nevus,,,male,chest,,,,DERM7PT
+877,Ndl071,,,nevus,,,male,lower limbs,,,,DERM7PT
+878,Ndl074,,,nevus,,,female,lower limbs,,,,DERM7PT
+879,Ndl079,,,nevus,,,female,upper limbs,,,,DERM7PT
+880,Ndl081,,,nevus,,,male,buttocks,,,,DERM7PT
+881,Ndl083,,,nevus,,,female,lower limbs,,,,DERM7PT
+882,Ngl029,,,nevus,,,female,upper limbs,,,,DERM7PT
+883,Ngl031,,,nevus,,,female,lower limbs,,,,DERM7PT
+884,Ngl033,,,nevus,,,female,lower limbs,,,,DERM7PT
+885,Ngl037,,,nevus,,,female,upper limbs,,,,DERM7PT
+886,Ngl060,,,nevus,,,female,lower limbs,,,,DERM7PT
+887,Ngl078,,,nevus,,,male,upper limbs,,,,DERM7PT
+888,Nil004,,,nevus,,,female,lower limbs,,,,DERM7PT
+889,Nil023,,,nevus,,,male,lower limbs,,,,DERM7PT
+890,Nil029,,,nevus,,,female,lower limbs,,,,DERM7PT
+891,Nil041,,,nevus,,,female,lower limbs,,,,DERM7PT
+892,Nil058,,,nevus,,,male,back,,,,DERM7PT
+893,Nll100,,,nevus,,,female,abdomen,,,,DERM7PT
+894,Nml010,,,nevus,,,male,lower limbs,,,,DERM7PT
+895,Nml012,,,nevus,,,female,buttocks,,,,DERM7PT
+896,Nml016,,,nevus,,,female,lower limbs,,,,DERM7PT
+897,Nml049,,,nevus,,,male,lower limbs,,,,DERM7PT
+898,NML092,,,nevus,,,male,upper limbs,,,,DERM7PT
+899,Nml094,,,nevus,,,male,acral,,,,DERM7PT
+900,Nml096,,,nevus,,,male,upper limbs,,,,DERM7PT
+901,Ael421,,,nevus,,,male,lower limbs,,,,DERM7PT
+902,Acl207,,,nevus,,,male,lower limbs,,,,DERM7PT
+903,Acl225,,,nevus,,,female,upper limbs,,,,DERM7PT
+904,Acl295,,,nevus,,,male,back,,,,DERM7PT
+905,Adl358,,,nevus,,,female,lower limbs,,,,DERM7PT
+906,Adl395,,,nevus,,,female,lower limbs,,,,DERM7PT
+907,Adl399,,,nevus,,,male,upper limbs,,,,DERM7PT
+908,Ael401,,,nevus,,,male,back,,,,DERM7PT
+909,Ael405,,,nevus,,,male,upper limbs,,,,DERM7PT
+910,Ael407,,,nevus,,,female,lower limbs,,,,DERM7PT
+911,Ael465,,,nevus,,,female,back,,,,DERM7PT
+912,Ael484,,,nevus,,,male,chest,,,,DERM7PT
+913,gzl58,,,nevus,,,female,lower limbs,,,,DERM7PT
+914,gzl14,,,nevus,,,female,upper limbs,,,,DERM7PT
+915,Gal191,,,nevus,,,female,lower limbs,,,,DERM7PT
+916,Gal222,,,nevus,,,female,lower limbs,,,,DERM7PT
+917,Gal238,,,nevus,,,male,upper limbs,,,,DERM7PT
+918,FAL070,,,nevus,,,female,back,,,,DERM7PT
+919,Fbl018,,,nevus,,,female,lower limbs,,,,DERM7PT
+920,Fbl040,,,nevus,,,male,upper limbs,,,,DERM7PT
+921,FBL042,,,nevus,,,female,lower limbs,,,,DERM7PT
+922,Fel038,,,nevus,,,male,lower limbs,,,,DERM7PT
+923,Fel074,,,nevus,,,female,lower limbs,,,,DERM7PT
+924,Fel080,,,nevus,,,male,abdomen,,,,DERM7PT
+925,Ffl034,,,nevus,,,female,head neck,,,,DERM7PT
+926,Ffl084,,,nevus,,,male,lower limbs,,,,DERM7PT
+927,Fll077,,,nevus,,,female,back,,,,DERM7PT
+928,Ggl026,,,nevus,,,male,upper limbs,,,,DERM7PT
+929,Ggl010,,,nevus,,,male,lower limbs,,,,DERM7PT
+930,Fgl023,,,nevus,,,female,chest,,,,DERM7PT
+931,Fgl037,,,nevus,,,female,buttocks,,,,DERM7PT
+932,Fgl074,,,nevus,,,female,abdomen,,,,DERM7PT
+933,Fgl087,,,nevus,,,female,lower limbs,,,,DERM7PT
+934,newl030,,,nevus,,,female,upper limbs,,,,DERM7PT
+935,newl034,,,nevus,,,female,upper limbs,,,,DERM7PT
+936,newl039,,,nevus,,,female,lower limbs,,,,DERM7PT
+937,Nel021,,,seborrheic keratosis,,,male,back,,,,DERM7PT
+938,Nel023,,,seborrheic keratosis,,,male,abdomen,,,,DERM7PT
+939,Nfl006,,,seborrheic keratosis,,,male,back,,,,DERM7PT
+940,Nfl008,,,seborrheic keratosis,,,female,back,,,,DERM7PT
+941,Nfl010,,,seborrheic keratosis,,,male,head neck,,,,DERM7PT
+942,Nfl012,,,seborrheic keratosis,,,male,back,,,,DERM7PT
+943,Nfl014,,,seborrheic keratosis,,,female,abdomen,,,,DERM7PT
+944,Nfl016,,,seborrheic keratosis,,,female,upper limbs,,,,DERM7PT
+945,Nfl018,,,seborrheic keratosis,,,male,upper limbs,,,,DERM7PT
+946,Nfl020,,,seborrheic keratosis,,,male,head neck,,,,DERM7PT
+947,Nfl022,,,seborrheic keratosis,,,female,head neck,,,,DERM7PT
+948,Nfl024,,,seborrheic keratosis,,,male,head neck,,,,DERM7PT
+949,Nfl026,,,seborrheic keratosis,,,male,chest,,,,DERM7PT
+950,NFL028,,,seborrheic keratosis,,,female,abdomen,,,,DERM7PT
+951,Nml114,,,seborrheic keratosis,,,male,head neck,,,,DERM7PT
+952,Acl227,,,seborrheic keratosis,,,male,back,,,,DERM7PT
+953,Acl229,,,seborrheic keratosis,,,male,upper limbs,,,,DERM7PT
+954,Acl261,,,seborrheic keratosis,,,female,abdomen,,,,DERM7PT
+955,Ael409,,,seborrheic keratosis,,,male,upper limbs,,,,DERM7PT
+956,Ael427,,,seborrheic keratosis,,,female,back,,,,DERM7PT
+957,Ael488,,,seborrheic keratosis,,,female,abdomen,,,,DERM7PT
+958,Acl205,,,seborrheic keratosis,,,female,back,,,,DERM7PT
+959,gzl18,,,seborrheic keratosis,,,male,chest,,,,DERM7PT
+960,gzl30,,,seborrheic keratosis,,,female,chest,,,,DERM7PT
+961,gzl46,,,seborrheic keratosis,,,female,abdomen,,,,DERM7PT
+962,Gal130,,,seborrheic keratosis,,,male,back,,,,DERM7PT
+963,Gal173,,,seborrheic keratosis,,,male,chest,,,,DERM7PT
+964,Gal134,,,seborrheic keratosis,,,female,back,,,,DERM7PT
+965,Fal048,,,seborrheic keratosis,,,male,head neck,,,,DERM7PT
+966,FFL052,,,seborrheic keratosis,,,male,chest,,,,DERM7PT
+967,Ffl070,,,seborrheic keratosis,,,male,head neck,,,,DERM7PT
+968,Fdl032,,,seborrheic keratosis,,,male,head neck,,,,DERM7PT
+969,Fdl058,,,seborrheic keratosis,,,male,back,,,,DERM7PT
+970,Fdl071,,,seborrheic keratosis,,,female,head neck,,,,DERM7PT
+971,Fdl074,,,seborrheic keratosis,,,male,head neck,,,,DERM7PT
+972,Ggl022,,,seborrheic keratosis,,,female,abdomen,,,,DERM7PT
+973,Ggl018,,,seborrheic keratosis,,,male,head neck,,,,DERM7PT
+974,Ggl020,,,seborrheic keratosis,,,male,abdomen,,,,DERM7PT
+975,Ggl046,,,seborrheic keratosis,,,female,abdomen,,,,DERM7PT
+976,Ggl066,,,seborrheic keratosis,,,male,upper limbs,,,,DERM7PT
+977,Ggl086,,,seborrheic keratosis,,,male,abdomen,,,,DERM7PT
+978,Fll104,,,seborrheic keratosis,,,male,back,,,,DERM7PT
+979,Fhl048,,,seborrheic keratosis,,,male,back,,,,DERM7PT
+980,Fil080,,,seborrheic keratosis,,,female,chest,,,,DERM7PT
+981,Fdl060,,,seborrheic keratosis,,,female,abdomen,,,,DERM7PT
+982,Nel044,,,vascular lesion,,,female,lower limbs,,,,DERM7PT
+983,NEL055,,,vascular lesion,,,female,head neck,,,,DERM7PT
+984,Nel056,,,vascular lesion,,,female,head neck,,,,DERM7PT
+985,Nel059,,,vascular lesion,,,male,acral,,,,DERM7PT
+986,Nel061,,,vascular lesion,,,male,acral,,,,DERM7PT
+987,Nel062,,,vascular lesion,,,female,abdomen,,,,DERM7PT
+988,Nel064,,,vascular lesion,,,male,upper limbs,,,,DERM7PT
+989,Nel066,,,vascular lesion,,,female,abdomen,,,,DERM7PT
+990,Nel068,,,vascular lesion,,,male,lower limbs,,,,DERM7PT
+991,Nel071,,,vascular lesion,,,female,upper limbs,,,,DERM7PT
+992,Nel073,,,vascular lesion,,,female,head neck,,,,DERM7PT
+993,Nel075,,,vascular lesion,,,female,lower limbs,,,,DERM7PT
+994,Nel078,,,vascular lesion,,,female,acral,,,,DERM7PT
+995,Nel081,,,vascular lesion,,,female,acral,,,,DERM7PT
+996,Ngl082,,,vascular lesion,,,female,head neck,,,,DERM7PT
+997,Nml041,,,vascular lesion,,,female,upper limbs,,,,DERM7PT
+998,Nml108,,,vascular lesion,,,male,upper limbs,,,,DERM7PT
+999,Acl237,,,vascular lesion,,,female,lower limbs,,,,DERM7PT
+1000,Ael459,,,vascular lesion,,,male,acral,,,,DERM7PT
+1001,Ael519bis,,,vascular lesion,,,male,acral,,,,DERM7PT
+1002,gzl74,,,vascular lesion,,,male,upper limbs,,,,DERM7PT
+1003,Ggl012,,,vascular lesion,,,female,lower limbs,,,,DERM7PT
+1004,Ggl014,,,vascular lesion,,,female,chest,,,,DERM7PT
+1005,Ggl016,,,vascular lesion,,,male,chest,,,,DERM7PT
+1006,Ggl032,,,vascular lesion,,,female,acral,,,,DERM7PT
+1007,Fhl058,,,vascular lesion,,,male,head neck,,,,DERM7PT
+1008,Fhl060,,,vascular lesion,,,female,abdomen,,,,DERM7PT
+1009,Fil082,,,vascular lesion,,,male,head neck,,,,DERM7PT
+1010,newl016,,,vascular lesion,,,male,upper limbs,,,,DERM7PT
+1011,Adl389,,,melanoma,,,female,lower limbs,,,,DERM7PT
