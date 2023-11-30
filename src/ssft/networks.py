@@ -1,8 +1,12 @@
 import tensorflow as tf
 from tf.keras import Model
-from tensorflow.keras.applications.resnet import ResNet101, ResNet152
-from tensorflow.keras.applications.resnet50 import ResNet50
-from tensorflow.keras.applications.densenet import DenseNet121, DenseNet169
+import torch
+# from tensorflow.keras.applications.resnet import ResNet101, ResNet152
+# from tensorflow.keras.applications.resnet50 import ResNet50
+# from tensorflow.keras.applications.densenet import DenseNet121, DenseNet169
+import timm
+import torch
+import lightning as l
 
 WIDTH = 650
 HEIGHT = 450
@@ -14,34 +18,38 @@ class Ensemble(Model):
     """
 
     def __init__(self,
-                 models: List[tf.keras.Model] = None):
-        super(Ensemble, self).__init__()
+                 models: List[torch.nn.Module] = None):
         assert models is not None, "Must be initialized with list of models"
+        super(Ensemble, self).__init__()
         self.models = models
-        self.continuous_training_data = None
+        self.fine_tuning_data = None
         self.missed_data = None
         self.num_classes = models[0].num_classes
         self.acc = None
-        self.continuous_data_spec = (tf.TensorSpec(shape=(WIDTH, HEIGHT, 3), dtype=tf.float64),
-                                     tf.TensorSpec(shape=(2,), dtype=tf.float32),
-                                     tf.TensorSpec(shape=(), dtype=tf.int32),
-                                     tf.TensorSpec(shape=(2,), dtype=tf.float32))
-        self.missed_data_spec = (tf.TensorSpec(shape=(WIDTH, HEIGHT, 3), dtype=tf.float64),
-                                 tf.TensorSpec(shape=(2,), dtype=tf.float32))
+        self.device = torch.device('cuda' if torch.cuda.is_available() else
+                                   'mps' if torch.backends.mps.is_available() else
+                                   'cpu')
 
     def __call__(self,
                  data,
                  voting: str = 'soft',
-                 collect: bool = False):
+                 collect: bool = False,
+                 return_type: str = 'numpy'):
+
         """
         Make prediction using a majority voting
         :param args:
         :param kwargs:
         :return:
         """
+        assert voting in ['soft', 'hard'], "Voting has to be hard or soft!"
+        assert type(collect) == bool, "Collect has to be a boolean!"
+        assert return_type in ['numpy', 'tensor', 'list'], "return_type must be numpy, tensor, or list!"
+
         model_predictions = np.asarray([model.predict(data).numpy() for model in self.models])
         ensemble_predictions = list()
         if voting == 'soft':
+            # TODO: Add data collection
             # Get the average prediction for every datapoint and class. (Datapoint, Class)
             ensemble_predictions = np.mean(model_predictions, axis=0)
         if voting == 'hard':
@@ -51,7 +59,7 @@ class Ensemble(Model):
             hard_model_predictions = np.argmax(model_predictions, axis=-1)
             # Iterate over hard label list for each datapoint
             for i, datapoint_preds in enumerate(np.transpose(hard_model_predictions)):
-                # Get the unique classes voted for an how often
+                # Get the unique classes voted for and how often
                 unique, counts = np.unique(datapoint_preds, return_counts=True, axis=-1)
                 # Unanimous decision
                 if len(unique) == 1:
@@ -71,11 +79,17 @@ class Ensemble(Model):
 
                 # No majority
                 else:
-                    # Make dummy decision
+                    # TODO: Make dummy decision
+
                     # Collect miss
                     self.collect_miss(data)
 
-        return ensemble_predictions
+        if return_type == 'tensor':
+            return torch.FloatTensor(ensemble_predictions).to(self.device)
+        elif return_type == 'numpy':
+            return np.asarray(ensemble_predictions)
+        elif return_type == 'list':
+            return ensemble_predictions
 
     def fit(self, epochs:int):
         """
@@ -83,13 +97,25 @@ class Ensemble(Model):
         :param dataset:
         :return:
         """
-        ###### DOESNT WORK AS WE OLY COLLECT IMAGE AND LABEL
-        assert dataset is not None, "self.continuous_training_data is None." \
-                                    " Please review a dataset to collect datapoints"
+        ###### DOESNT WORK AS WE OLY COLLECT IMAGE AND LABEL #########
+        assert dataset is not None, "self.fine_tuning_data is None." \
+                                    " Review a dataset to collect datapoints!"
         # For every model filter out relevant datapoints and fit it to them
         for i, model in enumerate(self.models):
-            model.fit(self.continuous_training_data.filter(lambda im, pred, model, lbl: model == i),
+            model.fit(self.fine_tuning_data.filter(lambda im, pred, model, lbl: model == i),
                       epochs=epochs)
+
+    def test_ensemble(self, test_data, test_labels):
+        """
+        Test the performance of the ensemble on a test dataset
+        """
+        pass
+
+    def test_models(self, test_data, test_labels):
+        """
+        Test the performance of each model on a test dataset
+        """
+        pass
 
     def review_and_collect(self, dataset):
         """
@@ -98,10 +124,9 @@ class Ensemble(Model):
         :return:
         """
         predictions, models = self(dataset, return_type='')
-
         pass
 
-    def cycle_offline(self, data, num_cycles, epochs_per_cycle):
+    def cycle_offline(self, data, num_cycles, epochs_per_cycle, test_data):
         """
         Cycle over dataset. In each cycle review and collect data, and then fit the ensemble models on continuous
         training data. Repeat cycles and hope for performance increase on passed dataset
@@ -109,7 +134,9 @@ class Ensemble(Model):
         :return:
         """
         for i in num_cycles:
-            self.review_and_collect(data)
+            if test:
+                self.test(test_data)
+            _ = self(data, collect=True)
             self.fit(epochs=epochs_per_cycle)
             self.reset_data()
 
@@ -121,10 +148,10 @@ class Ensemble(Model):
         img = tf.data.Dataset.from_tensor_slices(x)
         pred = tf.data.Dataset.from_tensor_slices(pred)
         datapoint = tf.data.Dataset.zip((img, pred))
-        if self.continuous_training_data is None:
-            self.continuous_training_data = datapoint
+        if self.fine_tuning_data is None:
+            self.fine_tuning_data = datapoint
         else:
-            self.continuous_training_data = self.continuous_training_data.concatenate(datapoint)
+            self.fine_tuning_data = self.fine_tuning_data.concatenate(datapoint)
 
     def collect_miss(self, x, y):
         """Collect a datapoint which could not be determined.
@@ -148,14 +175,14 @@ class Ensemble(Model):
 
     def reset_data(self):
         """Data should be reset after each posttraining."""
-        self.continuous_training_data = None
+        self.fine_tuning_data = None
         self.missed_data = None
 
     def get_continuous_training_data(self):
-        return self.continuous_training_data
+        return self.fine_tuning_data
 
     def set_continuous_training_data(self, ds):
-        self.continuous_training_data = ds
+        self.fine_tuning_data = ds
 
     def get_missed_data(self):
         return self.missed_data
@@ -164,7 +191,7 @@ class Ensemble(Model):
         self.missed_data = ds
 
 
-class ResNet50_cet2(tf.keras.models.Sequential):
+class CustomResNet50_2(tf.keras.models.Sequential):
 
     def __init__(self, input_shape=(WIDTH, HEIGHT, 3), pooling='max', downsampling=512, num_classes=2):
         """
@@ -182,7 +209,7 @@ class ResNet50_cet2(tf.keras.models.Sequential):
         self.add(tf.keras.layers.Dense(num_classes, activation='softmax'))
 
 
-class ResNet50_cet(ResNet50):
+class CustomResNet50(ResNet50):
     def __init__(self, input_shape=(WIDTH, HEIGHT, 3), pooling='max'):
         """
         Initialize and configure the ResNet50 super class and add classifier to it matching the problem at hand
@@ -195,7 +222,7 @@ class ResNet50_cet(ResNet50):
                                            pooling=pooling)
 
 
-class ResNet101_cet(ResNet101):
+class CustomResNet101(ResNet101):
     def __init__(self, input_shape=(WIDTH, HEIGHT, 3), pooling='max'):
         """
         Initialize and configure the ResNet101 super class and add classifier to it matching the problem at hand
@@ -208,7 +235,7 @@ class ResNet101_cet(ResNet101):
                                             pooling=pooling)
 
 
-class ResNet152_cet(ResNet152):
+class CustomResNet152(ResNet152):
     def __init__(self, input_shape=(WIDTH, HEIGHT, 3), pooling='max'):
         """
         Initialize and configure the ResNet152 super class and add classifier to it matching the problem at hand
