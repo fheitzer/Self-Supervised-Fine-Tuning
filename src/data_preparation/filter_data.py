@@ -59,22 +59,28 @@ def cat_meta(name: str):
 
 def filter_dy(name, delete=False):
     data_dir = f'/Users/floyd/Documents/Studium/DS/FreiesProjekt/Self Supervised Fine Tuning/data/{name}'
-    meta = pd.read_csv(f"{data_dir}/metadata/{name}.csv")
-    files = [file for file in os.listdir(data_dir) if file.endswith('.png')]
+    meta = pd.read_csv(f"{data_dir}/../metadata/{name}.csv")
+    files = [(file, os.path.join(d, file)) for d,_,f in os.walk(data_dir) for file in f if file.endswith('.png')]
 
     not_histo = list()
+    histo = list()
 
-    for image_id in files:
-        dy = meta[meta['image_id'] == image_id[:-4]]['dy'].item()
-        if 'hist' not in dy:
-            not_histo.append(image_id)
+    for image_id, path in files:
+        dy = meta[meta['image_id'] == image_id[:-4]]['dx_type'].item()
+        if isinstance(dy, str):
+            if 'histo' in dy:
+                histo.append(path)
+        if not dy == dy:
+            not_histo.append(path)
+        elif 'hist' not in dy:
+            not_histo.append(path)
+
     print(len(not_histo))
+    print(len(histo))
 
     if delete:
         for file in not_histo:
-            path = os.getcwd()
-            path = os.path.join(path, file)
-            os.remove(path)
+            os.remove(file)
 
 
 def search_duplicates(dir, delete: bool = False, similarity='duplicates'):
@@ -88,7 +94,7 @@ def search_duplicates(dir, delete: bool = False, similarity='duplicates'):
 
 
 if __name__ == "__main__":
-    search_duplicates('BCN/nv/', similarity='similar')
+    filter_dy('BCN', delete=True)
     exit()
     #filter_isic2019_train(start=15000, end=None, name='15k_to_end')
     dataset_dir = '/Users/floyd/Documents/Studium/DS/FreiesProjekt/Self Supervised Fine Tuning/data/DERM7PT/600x450'
