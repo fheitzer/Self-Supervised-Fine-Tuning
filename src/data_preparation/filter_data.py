@@ -78,8 +78,7 @@ def filter_dy(name, delete=False):
 
 
 def search_duplicates(dir, delete: bool = False, similarity='duplicates'):
-    data_dir = '/Users/floyd/Documents/Studium/DS/FreiesProjekt/Self Supervised Fine Tuning/data/'
-    data_dir += dir
+    data_dir = os.path.abspath(os.path.join(os.getcwd(), "../..", 'data/', dir))
     dif = difPy.build(data_dir, recursive=True, show_progress=True)
     search = difPy.search(dif, similarity=similarity)
     print(search)
@@ -88,7 +87,8 @@ def search_duplicates(dir, delete: bool = False, similarity='duplicates'):
 
 
 if __name__ == "__main__":
-    search_duplicates('BCN/nv/', similarity='similar')
+    search_duplicates('BCN/nv/', delete=True)
+    search_duplicates('BCN/mel/', delete=True)
     exit()
     #filter_isic2019_train(start=15000, end=None, name='15k_to_end')
     dataset_dir = '/Users/floyd/Documents/Studium/DS/FreiesProjekt/Self Supervised Fine Tuning/data/DERM7PT/600x450'
