@@ -21,6 +21,8 @@ class Ensemble(Model):
                  models: List[torch.nn.Module] = None):
         assert models is not None, "Must be initialized with list of models"
         super(Ensemble, self).__init__()
+        if models is None:
+            self._build_models()
         self.models = models
         self.fine_tuning_data = None
         self.missed_data = None
@@ -189,6 +191,9 @@ class Ensemble(Model):
 
     def set_missed_data(self, ds):
         self.missed_data = ds
+
+    def _build_models(self, num_classes):
+        pass
 
 
 class CustomResNet50_2(tf.keras.models.Sequential):
