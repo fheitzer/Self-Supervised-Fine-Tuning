@@ -27,7 +27,7 @@ class DataHandler:
                  data_dir: str,
                  batch_size: int = 32,
                  shuffle: bool = True,
-                 num_workers: int = 8,
+                 num_workers: int = 4,
                  height: int = 450,
                  width: int = 600):
         self.data_dir = data_dir
@@ -52,8 +52,7 @@ class DataHandler:
             transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
         ])
         if "/" not in data_dir:
-            # TODO os.path.join()
-            self.data_dir = os.getcwd()[:-20] + 'data/' + data_dir + '/' + data_dir
+            self.data_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'data', data_dir)
         else:
             assert not os.path.isdir(data_dir), "There is no such directory!"
             self.data_dir = data_dir
@@ -70,7 +69,7 @@ class DataHandler:
             inputs, label, path = data
             inputs, label = inputs.to(self.device), label.to(self.device)
             yield inputs, label, path
-
+        #####################################
         # if not self.paths:
         #     self.read_dir()
         # if self.shuffle:
@@ -112,6 +111,7 @@ class DataHandler:
     #
     # def read_dir(self):
     #     self.paths = [[os.path.join(self.data_dir, file)] for file in os.listdir(self.data_dir) if x.endswith('.png')]
+    ####################################################
 
 
 if __name__ == "__main__":
