@@ -21,8 +21,12 @@ class Ensemble(Model):
                  models: List[torch.nn.Module] = None):
         assert models is not None, "Must be initialized with list of models"
         super(Ensemble, self).__init__()
-        if models is None:
-            self._build_models()
+        if models and all(isinstance(s, torch.nn.Module) for s in lis):
+            self.models = models
+        elif models and all(isinstance(s, str) for s in lis):
+            self._build_models(models)
+        else:
+            raise Exception("Models must be specified as torch.nn.Module list or list of strings with model names")
         self.models = models
         self.fine_tuning_data = None
         self.missed_data = None
@@ -34,10 +38,9 @@ class Ensemble(Model):
 
     def __call__(self,
                  data,
-                 voting: str = 'soft',
+                 voting: str = 'hard',
                  collect: bool = False,
                  return_type: str = 'numpy'):
-
         """
         Make prediction using a majority voting
         :param args:
@@ -50,8 +53,8 @@ class Ensemble(Model):
 
         model_predictions = np.asarray([model.predict(data).numpy() for model in self.models])
         ensemble_predictions = list()
+        # TODO: Implement soft vote
         if voting == 'soft':
-            # TODO: Add data collection
             # Get the average prediction for every datapoint and class. (Datapoint, Class)
             ensemble_predictions = np.mean(model_predictions, axis=0)
         if voting == 'hard':
@@ -99,7 +102,7 @@ class Ensemble(Model):
         :param dataset:
         :return:
         """
-        ###### DOESNT WORK AS WE OLY COLLECT IMAGE AND LABEL #########
+        ###### DOESNT WORK AS WE OLY COLLECT image id and label #########
         assert dataset is not None, "self.fine_tuning_data is None." \
                                     " Review a dataset to collect datapoints!"
         # For every model filter out relevant datapoints and fit it to them
