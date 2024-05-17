@@ -7,11 +7,11 @@ from torchvision import transforms, datasets
 
 class CustomDataSet(datasets.ImageFolder):
 
-    def __init__(self, root: str, transform: torchvision.transforms.Compose):
+    def __init__(self, root: str, transform: transforms.Compose):
         super().__init__(root=root, transform=transform)
 
     def __getitem__(self, idx):
-        path, target = self.samples[index]
+        path, target = self.samples[idx]
         sample = self.loader(path)
         if self.transform is not None:
             sample = self.transform(sample)
@@ -25,7 +25,7 @@ class DataHandler:
 
     def __init__(self,
                  data_dir: str,
-                 batch_size: int = 32,
+                 batch_size: int = 128,
                  shuffle: bool = True,
                  num_workers: int = 4,
                  height: int = 450,
@@ -51,11 +51,7 @@ class DataHandler:
             transforms.ConvertImageDtype(torch.float32),
             transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
         ])
-        if "/" not in data_dir:
-            self.data_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'data', data_dir)
-        else:
-            assert not os.path.isdir(data_dir), "There is no such directory!"
-            self.data_dir = data_dir
+        self.data_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', data_dir)
 
         self.dataset = CustomDataSet(root=self.data_dir, transform=self.transform)
         self.dataloader = torch.utils.data.DataLoader(self.dataset,
@@ -103,7 +99,7 @@ class DataHandler:
     #     pass
     #
     # def shuffle(self):
-    #     # TODO: Add shuffling by n (keeping n together)
+
     #     self.shuffle = True
     #
     # def set_data_paths(self, data_dir):
@@ -117,5 +113,5 @@ class DataHandler:
 if __name__ == "__main__":
     dh = DataHandler(data_dir='PH2', num_workers=1)
     for input, label, path in dh:
-        print(path)
+        print(label)
         break
