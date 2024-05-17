@@ -51,11 +51,7 @@ class DataHandler:
             transforms.ConvertImageDtype(torch.float32),
             transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
         ])
-        if "/" not in data_dir:
-            self.data_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', data_dir)
-        else:
-            assert not os.path.isdir(data_dir), "There is no such directory!"
-            self.data_dir = data_dir
+        self.data_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', data_dir)
 
         self.dataset = CustomDataSet(root=self.data_dir, transform=self.transform)
         self.dataloader = torch.utils.data.DataLoader(self.dataset,
@@ -117,5 +113,5 @@ class DataHandler:
 if __name__ == "__main__":
     dh = DataHandler(data_dir='PH2', num_workers=1)
     for input, label, path in dh:
-        print(path)
+        print(label)
         break
