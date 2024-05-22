@@ -31,7 +31,7 @@ class DataHandler:
                  height: int = 450,
                  width: int = 600,
                  device: str = 'auto',
-                 dtype = torch.float32):
+                 dtype=torch.float32):
         self.data_dir = data_dir
         self.height = height
         self.width = width

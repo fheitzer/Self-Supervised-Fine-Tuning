@@ -1,3 +1,4 @@
 data/*
 !data/metadata
 datasets/*
+datasets/*

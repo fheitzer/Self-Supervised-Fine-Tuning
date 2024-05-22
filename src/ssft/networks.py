@@ -201,15 +201,25 @@ class Ensemble(Model):
         pass
 
 
+def create_model(model="resnet18", pretrained=False, global_pool="catavgmax", num_classes=2):
+    """helper function to overwrite the default values of the timm library"""
+    model = timm.create_model(model, num_classes=num_classes, pretrained=pretrained, global_pool=global_pool)
+    return model
+
 
 class LitResnet(LightningModule):
-    def __init__(self, lr=0.05, model = "resnet18", pretrained=False, global_pool="catavgmax",num_classes=2):
+    def __init__(self, lr: float=0.05, model: str="resnet18", pretrained=False, global_pool="catavgmax", num_classes=2):
         super().__init__()
         self.save_hyperparameters()
-        self.model = timm.create_model(model=model,pretrained=pretrained,global_pool=global_pool,num_classes=num_classes)
+        self.model = create_model(model=model,
+                                  pretrained=pretrained,
+                                  global_pool=global_pool,
+                                  num_classes=num_classes)
         self.criterion = torch.nn.CrossEntropyLoss()
         self.nc = nc
         self.out_activation = torch.nn.functional.softmax
+        # Where used?
+        self.lr = lr
 
     def forward(self, x):
         out = self.model(x)

@@ -3,6 +3,7 @@ import timm
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 import data
+from networks import LitResnet, Ensemble
 
 import os
 import time
@@ -106,6 +107,27 @@ def baseline_training(model_name: str, dataset_name: str, num_epochs: int):
 
     # Train
     trainer.fit(model, dh_train, dh_val)
+
+
+def train_model(out_path, model_name: str='resnet18', dataset_name: str='isic1920_fil_split'):
+    # Get Dataset Eval and Train
+    dh_train = data.DataHandler(os.path.join(dataset_name, 'train/'), batch_size=32, device='cuda')
+    dh_val = data.DataHandler(os.path.join(dataset_name, 'val/'), batch_size=32, device='cuda')
+
+    #my_sampler_tr = ImbalancedDatasetSampler(...)  # da geht auch ein anderer sampler, ich nutz meistens irgendeinen selbst geschriebenen
+    model = LitResnet(model_name, )
+    callbacks = [ModelCheckpoint(os.path.join('models', model_name, t),
+                                 monitor='val_loss',
+                                 filename='{epoch}-{val_loss:.2f}',
+                                 save_weights_only=True,
+                                 every_n_epochs=1),
+                 EarlyStopping(monitor='val_loss', mode='min')]
+
+    trainer = Trainer(devices=1, accelerator="cuda", callbacks=callbacks)
+    trainer.fit(model, dh_train, dh_val)
+
+    torch.save(model, os.path.join(out_path,name)+".pt")  # out_path und name sind natürlich parmeter von train_model()
+    return model
 
 
 if __name__ == "__main__":
