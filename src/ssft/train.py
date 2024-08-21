@@ -20,11 +20,11 @@ def baseline_training(model_name: str, dataset_name: str, num_epochs: int):
                            'cpu')
 
     # Get model
-    model = timm.create_model(model_name, num_classes=2, pretrained=False).to('cuda').to(torch.float32)
+    model = timm.create_model(model_name, num_classes=2, pretrained=False).to(device).to(torch.float32)
 
     # Get Dataset Eval and Train
-    dh_train = data.DataHandler(os.path.join(dataset_name, 'train/'), batch_size=32, device='cuda')
-    dh_val = data.DataHandler(os.path.join(dataset_name, 'val/'), batch_size=32, device='cuda')
+    dh_train = data.DataHandler(os.path.join(dataset_name, 'train/'), batch_size=32, device=device)
+    dh_val = data.DataHandler(os.path.join(dataset_name, 'val/'), batch_size=32, device=device)
 
     # Get Loss
     train_loss_fn = torch.nn.CrossEntropyLoss(
@@ -43,8 +43,8 @@ def baseline_training(model_name: str, dataset_name: str, num_epochs: int):
             # print('batch', i)
             logits = model(inputs)#.to('cuda')
             # print("logits train", logits)
-            predictions = torch.nn.functional.softmax(logits, dim=1)
-            targets = torch.nn.functional.one_hot(targets.to(torch.int64).to("cuda"), num_classes=2).to(torch.float32)
+            #predictions = torch.nn.functional.softmax(logits, dim=1)
+            targets = torch.nn.functional.one_hot(targets.to(torch.int64).to(device), num_classes=2).to(torch.float32)
             # print(predictions)
             # print(targets)
             loss = train_loss_fn(predictions, targets)
@@ -65,7 +65,7 @@ def baseline_training(model_name: str, dataset_name: str, num_epochs: int):
             # print("logits", logits)
             predictions = torch.nn.functional.softmax(logits, dim=1)
             # print("outputs", predictions)
-            targets = torch.nn.functional.one_hot(targets.to(torch.int64).to("cuda"), num_classes=2).to(torch.float32)
+            targets = torch.nn.functional.one_hot(targets.to(torch.int64).to(device), num_classes=2).to(torch.float32)
             # print(predictions.size())
             # print(targets.size())
             val_loss = train_loss_fn(predictions, targets)
