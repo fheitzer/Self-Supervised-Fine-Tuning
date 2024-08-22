@@ -27,7 +27,7 @@ class DataHandler:
                  data_dir: str,
                  batch_size: int = 128,
                  shuffle: bool = True,
-                 num_workers: int = 4,
+                 num_workers: int = 16,
                  height: int = 450,
                  width: int = 600,
                  device: str = 'auto',
@@ -60,6 +60,8 @@ class DataHandler:
         self.data_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', data_dir)
 
         self.dataset = CustomDataSet(root=self.data_dir, transform=self.transform)
+        #self.dataset.data = self.dataset.data.to(self.device)
+        #self.dataset.target = self.dataset.target.to(self.device)
         self.dataloader = torch.utils.data.DataLoader(self.dataset,
                                                       batch_size=batch_size,
                                                       shuffle=shuffle,
@@ -117,7 +119,8 @@ class DataHandler:
 
 
 if __name__ == "__main__":
-    dh = DataHandler(data_dir='PH2', num_workers=1)
-    for input, label, path in dh:
+    dh = DataHandler(data_dir='isic1920_fil_split/train/', num_workers=1)
+    for data, label, path in dh:
         print(label)
+        print(label.size(dim=0))
         break

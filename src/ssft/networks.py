@@ -1,26 +1,103 @@
-import tensorflow as tf
-from tf.keras import Model
 import torch
-# from tensorflow.keras.applications.resnet import ResNet101, ResNet152
-# from tensorflow.keras.applications.resnet50 import ResNet50
-# from tensorflow.keras.applications.densenet import DenseNet121, DenseNet169
 import timm
-import torch
-import lightning as l
 from pytorch_lightning import LightningModule, Trainer, seed_everything
+import numpy as np
+from torch import nn, optim
 
 
 WIDTH = 650
 HEIGHT = 450
 
 
-class Ensemble(Model):
+def create_model(model="resnet18", pretrained=False, global_pool="catavgmax", num_classes=2):
+    """helper function to overwrite the default values of the timm library"""
+    model = timm.create_model(model, num_classes=num_classes, pretrained=pretrained, global_pool=global_pool)
+    return model
+
+
+class LitResnet(LightningModule):
+    """"""
+    
+    def __init__(self, learning_rate: float=0.0001, model: str='resnet18', pretrained=False, global_pool="catavgmax", num_classes=2):
+        super().__init__()
+        self.save_hyperparameters()
+        #self.device = torch.device('cuda' if torch.cuda.is_available() else
+         #                          'mps' if torch.backends.mps.is_available() else
+          #                         'cpu')
+        self.model = create_model(model=model,
+                                  pretrained=pretrained,
+                                  global_pool=global_pool,
+                                  num_classes=num_classes)
+        # New Pytorch recommended way to send model to cpu
+        # self.model = torch.compile(self.model, backend="inductor")
+        self.criterion = torch.nn.CrossEntropyLoss()
+        self.num_classes = num_classes
+        self.out_activation = torch.nn.functional.softmax
+        # Where used?
+        self.learning_rate = learning_rate
+
+    def forward(self, x):
+        out = self.model(x)
+        return out
+
+    def predict(self, x):
+        out = self.model(x)
+        out = self.out_activation(out, dim=1)
+        return out
+
+    def training_step(self, batch, batch_idx):
+        # Define training step for Trainer Module
+        # Example
+        samples, targets, _ = batch
+        outputs = self.forward(samples)
+        loss = self.criterion(outputs, targets)
+        accuracy = self.binary_accuracy(outputs, targets)
+        batch_size = targets.size(dim=0)
+        self.log('train_accuracy', accuracy, prog_bar=True, batch_size=batch_size)
+        self.log('train_loss', loss, batch_size=batch_size)
+        #return {'loss':loss,"training_accuracy": accuracy}
+        return loss
+    
+    def validation_step(self, batch, batch_idx):
+        inputs, targets, _ = batch
+        outputs = self.forward(inputs)
+        accuracy = self.binary_accuracy(outputs, targets)
+        loss = self.criterion(outputs, targets)
+        batch_size = targets.size(dim=0)
+        self.log('val_accuracy', accuracy, batch_size=batch_size)
+        self.log('val_loss', loss, batch_size=batch_size)
+        #return {"val_loss":loss, "test_accuracy":accuracy}
+        #return loss
+
+    def test_step(self, batch, batch_idx):
+        inputs, targets, _ = batch
+        outputs = self.forward(inputs)
+        accuracy = self.binary_accuracy(outputs, targets)
+        loss = self.criterion(outputs, targets)
+        batch_size = targets.size(dim=0)
+        self.log('test_accuracy', accuracy, batch_size=batch_size)
+        self.log('test_loss', loss, batch_size=batch_size)
+        #return {"test_loss":loss, "test_accuracy":accuracy}
+        #return loss
+    
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        return optimizer
+
+    def binary_accuracy(self, outputs, targets):
+        _, outputs = torch.max(outputs,1)
+        correct_results_sum = (outputs == targets).sum().float()
+        acc = correct_results_sum/targets.shape[0]
+        return acc
+
+
+class Ensemble(torch.nn.Module):
     """
     One network to rule them all
     """
 
     def __init__(self,
-                 models: List[torch.nn.Module] = None):
+                 models: list[torch.nn.Module] = None):
         assert models is not None, "Must be initialized with list of models"
         super(Ensemble, self).__init__()
         if models and all(isinstance(s, torch.nn.Module) for s in lis):
@@ -53,7 +130,7 @@ class Ensemble(Model):
         assert type(collect) == bool, "Collect has to be a boolean!"
         assert return_type in ['numpy', 'tensor', 'list'], "return_type must be numpy, tensor, or list!"
 
-        model_predictions = np.asarray([model.predict(data).numpy() for model in self.models])
+        model_predictions = np.asarray([model.forward(data).numpy() for model in self.models])
         ensemble_predictions = list()
         # TODO: Implement soft vote
         if voting == 'soft':
@@ -152,33 +229,36 @@ class Ensemble(Model):
         with the index of the model that needs to be trained on that datapoint
         and the label predicted by the other networks.
         """
-        img = tf.data.Dataset.from_tensor_slices(x)
-        pred = tf.data.Dataset.from_tensor_slices(pred)
-        datapoint = tf.data.Dataset.zip((img, pred))
-        if self.fine_tuning_data is None:
-            self.fine_tuning_data = datapoint
-        else:
-            self.fine_tuning_data = self.fine_tuning_data.concatenate(datapoint)
+        pass
+        #img = tf.data.Dataset.from_tensor_slices(x)
+        #pred = tf.data.Dataset.from_tensor_slices(pred)
+        #datapoint = tf.data.Dataset.zip((img, pred))
+        #if self.fine_tuning_data is None:
+         #   self.fine_tuning_data = datapoint
+        #else:
+         #   self.fine_tuning_data = self.fine_tuning_data.concatenate(datapoint)
 
     def collect_miss(self, x, y):
         """Collect a datapoint which could not be determined.
         Review by hand later.
         """
-        img = tf.data.Dataset.from_tensor_slices([x])
-        if self.missed_data is None:
-            self.missed_data = datapoint
-        else:
-            self.missed_data = self.missed_data.concatenate(datapoint)
+        pass
+        #img = tf.data.Dataset.from_tensor_slices([x])
+        #if self.missed_data is None:
+         #   self.missed_data = datapoint
+        #else:
+         #   self.missed_data = self.missed_data.concatenate(datapoint)
 
     def load_data(self, filepath):
-        self.set_continuous_training_data(
-            tf.data.experimental.load(filepath[0],
-                                      compression='GZIP',
-                                      element_spec=self.continuous_data_spec))
-        self.set_missed_data(
-            tf.data.experimental.load(filepath[1],
-                                      compression='GZIP',
-                                      element_spec=self.missed_data_spec))
+        pass
+        #self.set_continuous_training_data(
+         #   tf.data.experimental.load(filepath[0],
+          #                            compression='GZIP',
+           #                           element_spec=self.continuous_data_spec))
+        #self.set_missed_data(
+         #   tf.data.experimental.load(filepath[1],
+          #                            compression='GZIP',
+           #                           element_spec=self.missed_data_spec))
 
     def reset_data(self):
         """Data should be reset after each posttraining."""
@@ -201,92 +281,3 @@ class Ensemble(Model):
         pass
 
 
-def create_model(model="resnet18", pretrained=False, global_pool="catavgmax", num_classes=2):
-    """helper function to overwrite the default values of the timm library"""
-    model = timm.create_model(model, num_classes=num_classes, pretrained=pretrained, global_pool=global_pool)
-    return model
-
-
-class LitResnet(LightningModule):
-    def __init__(self, lr: float=0.05, model: str="resnet18", pretrained=False, global_pool="catavgmax", num_classes=2):
-        super().__init__()
-        self.save_hyperparameters()
-        self.model = create_model(model=model,
-                                  pretrained=pretrained,
-                                  global_pool=global_pool,
-                                  num_classes=num_classes)
-        self.criterion = torch.nn.CrossEntropyLoss()
-        self.nc = nc
-        self.out_activation = torch.nn.functional.softmax
-        # Where used?
-        self.lr = lr
-
-    def forward(self, x):
-        out = self.model(x)
-        out = self.out_activation(out)
-        return out
-
-    def training_step(self, batch, batch_idx):
-        # Define training step for Trainer Module
-        # Example
-        x, y, z = batch
-        out = self.model(x)
-        loss = self.criterion(out, x)
-        return loss
-
-
-class CustomResNet50_2(tf.keras.models.Sequential):
-
-    def __init__(self, input_shape=(WIDTH, HEIGHT, 3), pooling='max', downsampling=512, num_classes=2):
-        """
-        Initialize and configure the ResNet50 super class and add classifier to it matching the problem at hand
-        :param input_shape: Image input shape. TF API states input width and height should not be smaller than 32.
-        :param pooling: Pooling method to be applied after the last convolutional block
-        """
-        super(ResNet50_cet2, self).__init__()
-        self.add(ResNet50(include_top=False,
-                          weights=None,
-                          input_shape=input_shape,
-                          pooling=pooling))
-        self.add(tf.keras.layers.Flatten())
-        self.add(tf.keras.layers.Dense(downsampling))
-        self.add(tf.keras.layers.Dense(num_classes, activation='softmax'))
-
-
-class CustomResNet50(ResNet50):
-    def __init__(self, input_shape=(WIDTH, HEIGHT, 3), pooling='max'):
-        """
-        Initialize and configure the ResNet50 super class and add classifier to it matching the problem at hand
-        :param input_shape: Image input shape. TF API states input width and height should not be smaller than 32.
-        :param pooling: Pooling method to be applied after the last convolutional block
-        """
-        super(ResNet50_cet, self).__init__(include_top=False,
-                                           weights=None,
-                                           input_shape=input_shape,
-                                           pooling=pooling)
-
-
-class CustomResNet101(ResNet101):
-    def __init__(self, input_shape=(WIDTH, HEIGHT, 3), pooling='max'):
-        """
-        Initialize and configure the ResNet101 super class and add classifier to it matching the problem at hand
-        :param input_shape: Image input shape. TF API states input width and height should not be smaller than 32.
-        :param pooling: Pooling method to be applied after the last convolutional block
-        """
-        super(ResNet101_cet, self).__init__(include_top=False,
-                                            weights=None,
-                                            input_shape=input_shape,
-                                            pooling=pooling)
-
-
-class CustomResNet152(ResNet152):
-    def __init__(self, input_shape=(WIDTH, HEIGHT, 3), pooling='max'):
-        """
-        Initialize and configure the ResNet152 super class and add classifier to it matching the problem at hand
-        :param input_shape: Image input shape. TF API states input width and height should not be smaller than 32.
-        :param pooling: Pooling method to be applied after the last convolutional block
-        """
-        super(ResNet152_cet, self).__init__(include_top=False,
-                                            weights=None,
-                                            input_shape=input_shape,
-                                            pooling=pooling)

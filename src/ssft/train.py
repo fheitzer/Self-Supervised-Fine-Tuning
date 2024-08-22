@@ -10,6 +10,8 @@ import time
 from timm.optim import AdamP
 from timm.loss import BinaryCrossEntropy
 
+torch.set_float32_matmul_precision('medium')
+
 
 def baseline_training(model_name: str, dataset_name: str, num_epochs: int):
     # Get training starttime for
@@ -33,7 +35,7 @@ def baseline_training(model_name: str, dataset_name: str, num_epochs: int):
     #validate_loss_fn = torch.nn.CrossEntropyLoss()
     # output_fn = torch.nn.functional.softmax(dim=2)
     # with
-    optimizer = AdamP(model.parameters(), lr=0.01)
+    optimizer = AdamP(model.parameters(), lr=0.0001)
     print("Training...")
     for epoch in range(num_epochs):
         print('epoch:', epoch + 1)
@@ -109,28 +111,43 @@ def baseline_training(model_name: str, dataset_name: str, num_epochs: int):
     trainer.fit(model, dh_train, dh_val)
 
 
-def train_model(out_path, model_name: str='resnet18', dataset_name: str='isic1920_fil_split'):
+def train_model(out_path: str='models', model_name: str='resnet18', dataset_name: str='isic1920_fil_split', device: str='cuda', batch_size: int=32):
+    # timestmap
+    t = time.strftime("%Y%m%d-%H%M%S")
     # Get Dataset Eval and Train
-    dh_train = data.DataHandler(os.path.join(dataset_name, 'train/'), batch_size=32, device='cuda')
-    dh_val = data.DataHandler(os.path.join(dataset_name, 'val/'), batch_size=32, device='cuda')
-
-    #my_sampler_tr = ImbalancedDatasetSampler(...)  # da geht auch ein anderer sampler, ich nutz meistens irgendeinen selbst geschriebenen
-    model = LitResnet(model_name, )
+    dh_train = data.DataHandler(os.path.join(dataset_name, 'train/'),
+                                batch_size=batch_size)
+    dh_val = data.DataHandler(os.path.join(dataset_name, 'val/'),
+                              batch_size=batch_size,
+                              shuffle=False)    
+    # Get the model
+    model = LitResnet(model=model_name)
+    # Define the callbacks
     callbacks = [ModelCheckpoint(os.path.join('models', model_name, t),
-                                 monitor='val_loss',
-                                 filename='{epoch}-{val_loss:.2f}',
+                                 monitor='train_loss',
+                                 filename='{epoch}-{train_loss:.2f}',
                                  save_weights_only=True,
                                  every_n_epochs=1),
-                 EarlyStopping(monitor='val_loss', mode='min')]
+                 EarlyStopping(monitor='val_loss',
+                               mode='min',
+                               min_delta=.00,
+                               patience=10)]
 
-    trainer = Trainer(devices=1, accelerator="cuda", callbacks=callbacks)
-    trainer.fit(model, dh_train, dh_val)
-
-    torch.save(model, os.path.join(out_path,name)+".pt")  # out_path und name sind natürlich parmeter von train_model()
+    # Configuring the trainer
+    trainer = Trainer(devices=1,
+                      accelerator="cuda",
+                      callbacks=callbacks,
+                      max_epochs=-1,
+                      log_every_n_steps=32)
+    trainer.fit(model,
+                dh_train.dataloader,
+                dh_val.dataloader)
+    # extra save
+    torch.save(model, os.path.join(out_path, model_name, dataset_name, t)+".pt")
     return model
 
 
 if __name__ == "__main__":
     models = ['resnet18']
     for model_name in models:
-        baseline_training(model_name, 'isic1920_fil_split', num_epochs=1)
+        train_model(model_name=model_name, batch_size=128)
