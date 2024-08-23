@@ -18,7 +18,7 @@ def create_model(model="resnet18", pretrained=False, global_pool="catavgmax", nu
 class LitResnet(LightningModule):
     """"""
     
-    def __init__(self, learning_rate: float=0.0001, model: str='resnet18', pretrained=False, global_pool="catavgmax", num_classes=2):
+    def __init__(self, learning_rate: float=0.0001, model: str='resnet18', pretrained=False, global_pool="catavgmax", num_classes=2, features_only=False):
         super().__init__()
         self.save_hyperparameters()
         #self.device = torch.device('cuda' if torch.cuda.is_available() else

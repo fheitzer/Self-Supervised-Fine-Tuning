@@ -73,55 +73,6 @@ class DataHandler:
                                                       shuffle=shuffle,
                                                       num_workers=num_workers)
 
-    def __iter__(self):
-        assert self.data_dir, "Data Directory needs to be specified!"
-        for i, data in enumerate(self.dataloader, 0):
-            inputs, label, path = data
-            inputs, label = inputs.to(self.device), label.to(self.device)
-            yield inputs, label, path
-        #####################################
-        # if not self.paths:
-        #     self.read_dir()
-        # if self.shuffle:
-        #     random.shuffle(self.paths)
-        #
-        # for batch in self.paths:
-        #     images = list()
-        #     for image_path in batch:
-        #         # Load PIL Image
-        #         image = PIL.Image.open(image_path)
-        #         # Transform pil image to torch tensor and apply transformations
-        #         image = self.transform(image)
-        #         # Send tensor to device (GPU)
-        #         image = image.to(self.device)
-        #         images.append(image)
-        #     yield images
-
-    # def batch(self, n):
-    #     assert self.batch, "Already batched!"
-    #     # Flatten
-    #     self.paths = [item for sublist in self.paths for item in sublist]
-    #     # Batch
-    #     self.paths = [self.paths[i: i+n] for i in range(0, len(self.paths), n)]
-    #     # Set batched to true
-    #     self.batched = True
-    #
-    # def prefetch(self, n):
-    #     pass
-    #
-    # def cache(self, n):
-    #     pass
-    #
-    # def shuffle(self):
-
-    #     self.shuffle = True
-    #
-    # def set_data_paths(self, data_dir):
-    #     self.data_dir = data_dir
-    #
-    # def read_dir(self):
-    #     self.paths = [[os.path.join(self.data_dir, file)] for file in os.listdir(self.data_dir) if x.endswith('.png')]
-    ####################################################
 
 
 if __name__ == "__main__":
