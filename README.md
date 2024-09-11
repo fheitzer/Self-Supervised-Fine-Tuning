@@ -11,7 +11,7 @@ Here only histopathologically labelled data was used, and resized to 600 x 450, 
 Create isic api account
 ```
 https://api.isic-archive.com/images/
-pip install isic cli
+pip install isic-cli
 cli user login
 E.g. BCN only melanomas
 isic image download --search "diagnosis:melanoma" --collections "249" --limit 0 myimages/
