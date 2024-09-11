@@ -15,6 +15,7 @@ pip install isic cli
 cli user login
 E.g. BCN only melanomas
 isic image download --search "diagnosis:melanoma" --collections "249" --limit 0 myimages/
+isic image download --search "diagnosis:melanoma OR diagnosis:nevus AND diagnosis_confirm_type:\"single image expert consensus\"" --collections "249" --limit 0 myimages/
 ```
 
 ## Data Transformations
