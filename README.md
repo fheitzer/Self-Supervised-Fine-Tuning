@@ -7,6 +7,17 @@ Adjust ensemble num_outputs accordingly.
 Metadata for MSK, UDA, HAM10K, PH2, DERM7PT, BCN20k is provided.
 Here only histopathologically labelled data was used, and resized to 600 x 450, to match the dataset with the lowest resolution (ham10k)
 
+### ISIC-CLI
+Create isic api account
+```
+https://api.isic-archive.com/images/
+pip install isic-cli
+cli user login
+E.g. BCN only melanomas
+isic image download --search "diagnosis:melanoma" --collections "249" --limit 0 myimages/
+isic image download --search "diagnosis:melanoma OR diagnosis:nevus AND diagnosis_confirm_type:\"single image expert consensus\"" --collections "249" --limit 0 myimages/
+```
+
 ## Data Transformations
 Necessary as there is not much data to work with
 - Random Horizontal and Vertical Flip
