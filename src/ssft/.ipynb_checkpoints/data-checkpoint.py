@@ -3,6 +3,9 @@ import PIL.Image
 import os
 import random
 from torchvision import transforms, datasets
+from utils import recommend_num_workers, recommend_max_batch_size
+
+from typing import Optional
 
 
 class CustomDataSet(datasets.ImageFolder):
@@ -25,13 +28,14 @@ class DataHandler:
 
     def __init__(self,
                  data_dir: str,
-                 batch_size: int = 128,
+                 batch_size: Optional[int, str] = 'auto',
                  shuffle: bool = True,
-                 num_workers: int = 16,
+                 num_workers: Optional[int, str] = 1,
                  height: int = 450,
                  width: int = 600,
                  device: str = 'auto',
-                 dtype=torch.float32):
+                 dtype: torch.dtype=torch.float32,
+                 model_name: str='dense201'):
         self.data_dir = data_dir
         self.height = height
         self.width = width
@@ -57,21 +61,40 @@ class DataHandler:
             transforms.ConvertImageDtype(dtype),
             transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
         ])
-        self.target_transform = None
         self.target_transform = transforms.Compose([
                                  lambda x:torch.tensor(x), # or just torch.LongTensor
                                  lambda x:torch.nn.functional.one_hot(x,2).float()])
         self.data_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', data_dir)
 
+            
+        # Recommend num workers
+        self.num_workers = num_workers
+        self.batch_size = batch_size
+        if batch_size == 'auto' and num_workers != 'auto':
+            self.batch_size = recommend_max_batch_size(image_folder=data_dir,
+                                                       num_workers=num_workers, 
+                                                       model_name=model_name, 
+                                                       data_transforms=self.transforms,
+                                                       target_transforms=self.target_transform)
+            
+        if num_workers == 'auto' and batch_size != 'auto':
+            self.num_workers = recommend_num_workers(image_folder=data_dir,
+                                                     batch_size=batch_size, 
+                                                     model_name=model_name, 
+                                                     data_transforms=self.transforms,
+                                                     target_transforms=self.target_transform)
+        print(f"Number of Recommended Workers: {self.num_workers}")
+
+        
+            
         self.dataset = CustomDataSet(root=self.data_dir,
                                      transform=self.transform,
                                      target_transform=self.target_transform)
-        #self.dataset.data = self.dataset.data.to(self.device)
-        #self.dataset.target = self.dataset.target.to(self.device)
         self.dataloader = torch.utils.data.DataLoader(self.dataset,
-                                                      batch_size=batch_size,
+                                                      batch_size=self.batch_size,
                                                       shuffle=shuffle,
-                                                      num_workers=num_workers)
+                                                      num_workers=self.num_workers,
+                                                      pin_memory=True)
 
 
 

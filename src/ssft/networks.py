@@ -28,8 +28,7 @@ class LitResnet(LightningModule):
                                   pretrained=pretrained,
                                   global_pool=global_pool,
                                   num_classes=num_classes)
-        # New Pytorch recommended way to send model to cpu
-        # self.model = torch.compile(self.model, backend="inductor")
+        # self.model = torch.compile(self.model)
         self.criterion = torch.nn.CrossEntropyLoss()
         self.num_classes = num_classes
         self.out_activation = torch.nn.functional.softmax
@@ -55,7 +54,6 @@ class LitResnet(LightningModule):
         batch_size = targets.size(dim=0)
         self.log('train_accuracy', accuracy, prog_bar=True, batch_size=batch_size)
         self.log('train_loss', loss, prog_bar=True, batch_size=batch_size)
-        #return {'loss':loss,"training_accuracy": accuracy}
         return loss
     
     def validation_step(self, batch, batch_idx):
@@ -66,8 +64,6 @@ class LitResnet(LightningModule):
         batch_size = targets.size(dim=0)
         self.log('val_accuracy', accuracy, batch_size=batch_size)
         self.log('val_loss', loss, batch_size=batch_size)
-        #return {"val_loss":loss, "test_accuracy":accuracy}
-        #return loss
 
     def test_step(self, batch, batch_idx):
         inputs, targets, _ = batch
@@ -77,8 +73,6 @@ class LitResnet(LightningModule):
         batch_size = targets.size(dim=0)
         self.log('test_accuracy', accuracy, batch_size=batch_size)
         self.log('test_loss', loss, batch_size=batch_size)
-        #return {"test_loss":loss, "test_accuracy":accuracy}
-        #return loss
     
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
