@@ -8,6 +8,18 @@ from PIL import Image
 import numpy as np
 import gc
 
+def set_seed(seed=42):
+    '''Sets the seed of the entire notebook so results are the same every time we run.
+    This is for REPRODUCIBILITY.'''
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    # When running on the CuDNN backend, two further options must be set
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    # Set a fixed value for the hash seed
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    
 
 # Function to calculate the average image file size in the folder and subfolders
 def calculate_average_image_size(folder):
@@ -99,7 +111,7 @@ def estimate_memory_per_image(avg_image_size, aug_complexity_factor, target_comp
 
 
 # Function to calculate the maximum batch size based on the number of workers and available RAM
-def calculate_max_batch_size(image_folder, num_workers, model_name, data_transforms, target_transforms):
+def recommend_max_batch_size(image_folder, num_workers, model_name, data_transforms, target_transforms):
     # Get available system resources
     available_ram = get_available_ram()
     

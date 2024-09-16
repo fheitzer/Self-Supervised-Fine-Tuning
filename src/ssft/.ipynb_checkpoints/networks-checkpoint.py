@@ -4,10 +4,13 @@ from pytorch_lightning import LightningModule, Trainer, seed_everything
 import numpy as np
 from torch import nn, optim
 
+from PIL import Image
+
 
 WIDTH = 650
 HEIGHT = 450
 
+# Stratified Kfold to split the data balanced by class and patient for train and val
 
 def create_model(model="resnet18", pretrained=False, global_pool="catavgmax", num_classes=2):
     """helper function to overwrite the default values of the timm library"""
@@ -15,10 +18,37 @@ def create_model(model="resnet18", pretrained=False, global_pool="catavgmax", nu
     return model
 
 
+class GeMPooling(nn.Module):
+    def __init__(self, p=3, eps=1e-6):
+        super(GeMPooling, self).__init__()
+        self.p = nn.Parameter(torch.ones(1)*p)
+        self.eps = eps
+
+    def forward(self, x):
+        return self.gem(x, p=self.p, eps=self.eps)
+        
+    def gem(self, x, p=3, eps=1e-6):
+        return F.avg_pool2d(x.clamp(min=eps).pow(p), (x.size(-2), x.size(-1))).pow(1./p)
+        
+    def __repr__(self):
+        return self.__class__.__name__ + \
+                '(' + 'p=' + '{:.4f}'.format(self.p.data.tolist()[0]) + \
+                ', ' + 'eps=' + str(self.eps) + ')'
+
+
 class LitResnet(LightningModule):
     """"""
     
-    def __init__(self, learning_rate: float=0.0001, model: str='resnet18', pretrained=False, global_pool="catavgmax", num_classes=2, features_only=False):
+    def __init__(self,
+                 learning_rate: float=1e-4,
+                 weight_decay: float=1e-6,
+                 model: str='tf_efficientnet_b0',
+                 #checkpoint_path: str='/kaggle/input/tf-efficientnet/pytorch/tf-efficientnet-b0/1/tf_efficientnet_b0_aa-827b6e33.pth',
+                 pretrained=False,
+                 global_pool="catavgmax",
+                 num_classes=2,
+                 features_only=False,
+                 class_weights=None):
         super().__init__()
         self.save_hyperparameters()
         #self.device = torch.device('cuda' if torch.cuda.is_available() else
@@ -26,23 +56,37 @@ class LitResnet(LightningModule):
           #                         'cpu')
         self.model = create_model(model=model,
                                   pretrained=pretrained,
+                                  #checkpoint_path=checkpoint_path,
                                   global_pool=global_pool,
-                                  num_classes=num_classes)
+                                  num_classes=num_classes,
+                                  #features_only=features_only
+                                 )
+        #in_features = self.model.classifier.in_features
+        #self.model.classifier = nn.Identity()
+        #self.model.global_pool = nn.Identity()
+        #self.pooling = GeMPooling()
+        #self.linear = nn.Linear(in_features, num_classes)
+        #self.softmax = nn.Softmax()
+        
         # self.model = torch.compile(self.model)
-        self.criterion = torch.nn.CrossEntropyLoss()
+        self.criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
         self.num_classes = num_classes
         self.out_activation = torch.nn.functional.softmax
         # Where used?
         self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
+
 
     def forward(self, x):
-        out = self.model(x)
-        return out
+        logits = self.model(x)
+        #pooled_features = self.pooling(features).flatten(1)
+        #output = self.softmax(self.linear(pooled_features))
+        return logits
 
     def predict(self, x):
-        out = self.model(x)
-        out = self.out_activation(out, dim=1)
-        return out
+        logits = self.model(x)
+        pred = self.softmaxs(logits, dim=1)
+        return pred
 
     def training_step(self, batch, batch_idx):
         # Define training step for Trainer Module
@@ -52,6 +96,8 @@ class LitResnet(LightningModule):
         loss = self.criterion(outputs, targets)
         accuracy = self.binary_accuracy(outputs, targets)
         batch_size = targets.size(dim=0)
+        #scheduler = self.lr_schedulers()
+        #scheduler.step()
         self.log('train_accuracy', accuracy, prog_bar=True, batch_size=batch_size)
         self.log('train_loss', loss, prog_bar=True, batch_size=batch_size)
         return loss
@@ -75,8 +121,15 @@ class LitResnet(LightningModule):
         self.log('test_loss', loss, batch_size=batch_size)
     
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        return optimizer
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer,
+                                                   T_max=500, 
+                                                   eta_min=1e-6)
+        return {'optimizer': optimizer,
+                'lr_scheduler': {'scheduler': scheduler,
+                                 'interval': 'step',
+                                 'frequency': 1}
+               }
 
     def binary_accuracy(self, outputs, targets):
         probabilities = self.out_activation(outputs, dim=1)
