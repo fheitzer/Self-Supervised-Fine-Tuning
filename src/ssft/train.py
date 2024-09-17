@@ -165,6 +165,9 @@ def ssft(out_path: str = 'fine-tuning-data',
 
     models_start_acc = ensemble.test_models(ds)
     ensemble_start_acc = ensemble.test_ensemble(ds)
+    print(models_start_acc)
+    print(ensemble_start_acc)
+    exit()
 
     ensemble.classify_and_collect(dh, save_path)
 
