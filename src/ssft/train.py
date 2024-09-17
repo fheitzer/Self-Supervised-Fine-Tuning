@@ -75,8 +75,7 @@ def train_baseline_model(out_path: str = 'models',
     # Get the model
     model = LitResnet(model=model_name,
                       class_weights=None if meta_path else dh_train.class_weights,
-                      local_ckeckpoint_path=local_ckeckpoint_path,
-                      pretrained=True if local_ckeckpoint_path else None)
+                      local_ckeckpoint_path=local_ckeckpoint_path)
     # Define the callbacks
     callbacks = [ModelCheckpoint(save_dir + f"/{t}/",
                                  monitor='val_loss',
@@ -135,6 +134,22 @@ def ssft():
     ]
 
     ensemble = Ensemble(models)
+
+    new_clinic = 'Memorial Sloan Kettering Cancer Center'
+
+    dh = data.DataHandler(data_dir=dataset_name,
+                          meta_path=meta_path,
+                          batch_size=batch_size,
+                          train=False,
+                          width=width,
+                          height=height,
+                          num_workers=num_workers,
+                          model_name=model_name,
+                          attribution=attribution)
+
+    ssft_datasets = [
+
+    ]
 
 
 if __name__ == "__main__":

@@ -35,20 +35,18 @@ class LitResnet(LightningModule):
                  weight_decay: float=1e-6,
                  model: str='tf_efficientnet_b0',
                  local_ckeckpoint_path: str = None,
-                 pretrained=False,
                  global_pool="catavgmax",
                  num_classes=2,
-                 features_only=False,
                  class_weights=None):
         super().__init__()
         self.save_hyperparameters()
         self.model_name = model
         
-        if local_ckeckpoint_path:
+        if local_ckeckpoint_path and isinstance(local_ckeckpoint_path, str):
             local_ckeckpoint_path = {'file': local_ckeckpoint_path}
         self.model = timm.create_model(model,
-                                       pretrained=pretrained,
-                                       pretrained_cfg=local_ckeckpoint_path,
+                                       pretrained=True if local_ckeckpoint_path else False,
+                                       pretrained_cfg_overlay=local_ckeckpoint_path,
                                        global_pool=global_pool,
                                        num_classes=num_classes,
                                       )
@@ -153,11 +151,11 @@ class Ensemble(LightningModule):
                                    'cpu')
 
     def load_models(self, models):
-        for model in models:
-            self.models.append(LitResnet(model=model,
-                                         #class_weights=None if meta_path else dh_train.class_weights,
-                                         local_ckeckpoint_path=local_ckeckpoint_path,
-                                         pretrained=True if local_ckeckpoint_path else None)
+        for model_path in models:
+            model_name = model_path.split('/')[0]
+            self.models.append(LitResnet(model=model_name,
+                                         local_ckeckpoint_path=model_path,
+                                         pretrained=True)
                                )
 
     def __call__(self,

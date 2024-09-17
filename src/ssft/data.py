@@ -194,9 +194,8 @@ class DataHandler:
                  data_dir: str = None,
                  meta_path: str = None,
                  train: bool=True,
-                 batch_size = 'auto',
-                 shuffle: bool = True,
-                 num_workers = 1,
+                 batch_size='auto',
+                 num_workers=1,
                  height: int = 450,
                  width: int = 600,
                  device: str = 'auto',
@@ -247,16 +246,23 @@ class DataHandler:
         # Metadata Version
         if self.meta_path:
             self.meta_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', self.meta_path)
-            self.dataset = CustomMetaDatasetBalanced(img_dir=self.data_dir,
-                                                     meta_path=self.meta_path,
-                                                     train=train,
-                                                     transform=self.transform if train else self.transform_val,
-                                                     target_transform=self.target_transform,
-                                                     attribution=attribution)
+            if train:
+                self.dataset = CustomMetaDatasetBalanced(img_dir=self.data_dir,
+                                                         meta_path=self.meta_path,
+                                                         train=train,
+                                                         transform=self.transform if train else self.transform_val,
+                                                         target_transform=self.target_transform,
+                                                         attribution=attribution)
+            else:
+                self.dataset = CustomMetaDataset(img_dir=self.data_dir,
+                                                 meta_path=self.meta_path,
+                                                 transform=self.transform if train else self.transform_val,
+                                                 target_transform=self.target_transform,
+                                                 attribution=attribution)
         # ImageFolders Version
         else:
             self.dataset = CustomImgFolderDataset(root=self.data_dir,
-                                                  transform=self.transform  if train else self.transform_val,
+                                                  transform=self.transform if train else self.transform_val,
                                                   target_transform=self.target_transform)
     
             # Balancing: Get class weight
