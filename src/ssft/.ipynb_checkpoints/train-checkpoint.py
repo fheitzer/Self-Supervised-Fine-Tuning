@@ -25,7 +25,8 @@ def train_model(out_path: str = 'models',
                 num_workers: int = 1,
                 attribution: str = '',
                 height: int = 384,
-                width: int = 384
+                width: int = 384,
+                local_ckeckpoint_path: str = None
                ):
 
     ### Reproducability
@@ -73,7 +74,9 @@ def train_model(out_path: str = 'models',
     
     # Get the model
     model = LitResnet(model=model_name,
-                      class_weights=None if meta_path else dh_train.class_weights)
+                      class_weights=None if meta_path else dh_train.class_weights,
+                      local_ckeckpoint_path=local_ckeckpoint_path,
+                      pretrained=True if local_ckeckpoint_path else None)
     # Define the callbacks
     callbacks = [ModelCheckpoint(save_dir + f"/{t}/",
                                  monitor='val_loss',
@@ -86,7 +89,7 @@ def train_model(out_path: str = 'models',
                  EarlyStopping(monitor='val_loss',
                                mode='min',
                                min_delta=0.0,
-                               patience=50)]
+                               patience=10)]
     
     # Set TensorboardLogger
     logger = TensorBoardLogger(save_dir, t + "_logs")
@@ -98,7 +101,7 @@ def train_model(out_path: str = 'models',
     logger.log_hyperparams(extra_params)
 
     # set logging frequency to every epoch
-    logging_frequency = int(len(dh_train.dataset) / batch_size)
+    batches_per_epoch = int(len(dh_train.dataset) / batch_size)
     
     # Configuring the trainer
     trainer = Trainer(devices=1,
@@ -106,9 +109,9 @@ def train_model(out_path: str = 'models',
                       callbacks=callbacks,
                       max_epochs=-1,
                       logger=logger,
-                      log_every_n_steps=logging_frequency,
+                      log_every_n_steps=batches_per_epoch,
                       check_val_every_n_epoch=20,
-                      #precision=precision,
+                      #precision=precision, # 16 or mixed precision doesnt work. loss gets nan
                       min_epochs=100
                       )
     # Train
@@ -126,14 +129,23 @@ if __name__ == "__main__":
               'densenet121',
               'densenet161',
               'densenet169',
-              'densenet201']
-    #models = ['resnet18']
+              #'densenet201',
+              'tf_efficientnet_b0',
+              'vgg16',
+              'inception_v3',
+              'xception71',
+              'mobilenetv2_140',
+              'vit_base_patch16_224',
+             ]
+    local_checkpoint_paths = []
+    
     for model_name in models:
-        train_model(model_name='densenet201',
+        train_model(model_name=model_name,
+                    local_ckeckpoint_path=None,
                     batch_size=32,
                     num_workers='auto',
                     dataset_name='ISIC2024/train-image/image/',
                     meta_path='ISIC2024/train-metadata.csv',
-                    precision="16-true",
-                    #attribution="Department of Dermatology, Hospital Clínic de Barcelona"
+                    #precision="16-true",
+                    attribution="Department of Dermatology, Hospital Clínic de Barcelona"
                    )

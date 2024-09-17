@@ -7,16 +7,6 @@ from torch import nn, optim
 from PIL import Image
 
 
-WIDTH = 650
-HEIGHT = 450
-
-# Stratified Kfold to split the data balanced by class and patient for train and val
-
-def create_model(model="resnet18", pretrained=False, global_pool="catavgmax", num_classes=2):
-    """helper function to overwrite the default values of the timm library"""
-    model = timm.create_model(model, num_classes=num_classes, pretrained=pretrained, global_pool=global_pool)
-    return model
-
 
 class GeMPooling(nn.Module):
     def __init__(self, p=3, eps=1e-6):
@@ -43,7 +33,7 @@ class LitResnet(LightningModule):
                  learning_rate: float=1e-4,
                  weight_decay: float=1e-6,
                  model: str='tf_efficientnet_b0',
-                 #checkpoint_path: str='/kaggle/input/tf-efficientnet/pytorch/tf-efficientnet-b0/1/tf_efficientnet_b0_aa-827b6e33.pth',
+                 local_ckeckpoint_path: str = None,
                  pretrained=False,
                  global_pool="catavgmax",
                  num_classes=2,
@@ -51,16 +41,15 @@ class LitResnet(LightningModule):
                  class_weights=None):
         super().__init__()
         self.save_hyperparameters()
-        #self.device = torch.device('cuda' if torch.cuda.is_available() else
-         #                          'mps' if torch.backends.mps.is_available() else
-          #                         'cpu')
-        self.model = create_model(model=model,
-                                  pretrained=pretrained,
-                                  #checkpoint_path=checkpoint_path,
-                                  global_pool=global_pool,
-                                  num_classes=num_classes,
-                                  #features_only=features_only
-                                 )
+        
+        if local_ckeckpoint_path:
+            local_ckeckpoint_path = {'file': local_ckeckpoint_path}
+        self.model = timm.create_model(model,
+                                       pretrained=pretrained,
+                                       pretrained_cfg=local_ckeckpoint_path,
+                                       global_pool=global_pool,
+                                       num_classes=num_classes,
+                                      )
         #in_features = self.model.classifier.in_features
         #self.model.classifier = nn.Identity()
         #self.model.global_pool = nn.Identity()
@@ -85,7 +74,7 @@ class LitResnet(LightningModule):
 
     def predict(self, x):
         logits = self.model(x)
-        pred = self.softmaxs(logits, dim=1)
+        pred = self.out_activation(logits, dim=1)
         return pred
 
     def training_step(self, batch, batch_idx):
@@ -122,8 +111,8 @@ class LitResnet(LightningModule):
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer,
-                                                   T_max=500, 
-                                                   eta_min=1e-6)
+                                                         T_max=500, 
+                                                         eta_min=1e-6)
         return {'optimizer': optimizer,
                 'lr_scheduler': {'scheduler': scheduler,
                                  'interval': 'step',
@@ -145,15 +134,12 @@ class Ensemble(torch.nn.Module):
     """
 
     def __init__(self,
-                 models: list[torch.nn.Module] = None):
-        assert models is not None, "Must be initialized with list of models"
+                 models: list[LightningModule]):
         super(Ensemble, self).__init__()
-        if models and all(isinstance(s, torch.nn.Module) for s in lis):
+        if models and all(isinstance(s, LightningModule) for s in lis):
             self.models = models
-        elif models and all(isinstance(s, str) for s in lis):
-            self._build_models(models)
         else:
-            raise Exception("Models must be specified as torch.nn.Module list or list of strings with model names")
+            raise Exception("Models must be specified as lightning.LightningModule list")
         self.models = models
         self.fine_tuning_data = None
         self.missed_data = None
@@ -178,7 +164,8 @@ class Ensemble(torch.nn.Module):
         assert type(collect) == bool, "Collect has to be a boolean!"
         assert return_type in ['numpy', 'tensor', 'list'], "return_type must be numpy, tensor, or list!"
 
-        model_predictions = np.asarray([model.forward(data).numpy() for model in self.models])
+        
+        model_predictions = np.asarray([model.predict(data).numpy() for model in self.models])
         ensemble_predictions = list()
         # TODO: Implement soft vote
         if voting == 'soft':
@@ -236,6 +223,8 @@ class Ensemble(torch.nn.Module):
         for i, model in enumerate(self.models):
             model.fit(self.fine_tuning_data.filter(lambda im, pred, model, lbl: model == i),
                       epochs=epochs)
+
+    def get_model_predictions(self):
 
     def test_ensemble(self, test_data, test_labels):
         """
@@ -324,8 +313,5 @@ class Ensemble(torch.nn.Module):
 
     def set_missed_data(self, ds):
         self.missed_data = ds
-
-    def _build_models(self, num_classes):
-        pass
 
 

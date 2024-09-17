@@ -11,6 +11,8 @@ from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 
 
+# Stratified Kfold to split the data balanced by class and patient for train and val
+
 from utils import recommend_num_workers, recommend_max_batch_size
 
 from typing import Optional
@@ -38,6 +40,44 @@ class CustomImgFolderDataset(datasets.ImageFolder):
 
         return sample, target, path
 
+class CustomMetaDataset(Dataset):
+    """This dataset samples an unbalanced binary classification dataset in a 50/50 fashion"""
+
+    def __init__(self,
+                 meta_path,
+                 img_dir,
+                 transform: transforms.Compose,
+                 target_transform: transforms.Compose,
+                 attribution: str=None):
+        super().__init__()
+        self.df = pd.read_csv(meta_path, low_memory=False)
+        if attribution:
+            self.df = self.df[self.df['attribution'] == attribution]
+        self.targets = self.df['target'].values
+        self.image_ids = self.df['isic_id'].values
+            
+        self.transform = transform
+        self.target_transform = target_transform
+        self.img_dir = img_dir
+        self.train = train
+        self.n_samples = len(self.df)
+
+    def __len__(self):
+        return self.n_samples
+
+    def __getitem__(self, idx):
+        # Get Image and target
+        img_id = self.image_ids[idx]
+        img = default_loader(os.path.join(self.img_dir, img_id + '.jpg'))
+        target = targets[idx]
+        # Transform if configured
+        if self.transform:
+            img = self.transform(img)
+        if self.target_transform:
+            target = self.target_transform(target)
+            
+        return img, target, img_id
+        
 
 class CustomMetaDatasetBalanced(Dataset):
     """This dataset samples an unbalanced binary classification dataset in a 50/50 fashion"""
