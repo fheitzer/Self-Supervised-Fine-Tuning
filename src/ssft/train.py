@@ -191,7 +191,6 @@ if __name__ == "__main__":
               'inception_v3',
               'xception71',
               'mobilenetv2_140',
-              'vit_base_patch16_224',
               ]
     local_checkpoint_paths = []
     
