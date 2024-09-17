@@ -1,3 +1,4 @@
+import pandas as pd
 import torch
 import timm
 from pytorch_lightning import LightningModule, Trainer, seed_everything
@@ -41,6 +42,7 @@ class LitResnet(LightningModule):
                  class_weights=None):
         super().__init__()
         self.save_hyperparameters()
+        self.model_name = model
         
         if local_ckeckpoint_path:
             local_ckeckpoint_path = {'file': local_ckeckpoint_path}
@@ -64,7 +66,6 @@ class LitResnet(LightningModule):
         # Where used?
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
-
 
     def forward(self, x):
         logits = self.model(x)
@@ -128,7 +129,7 @@ class LitResnet(LightningModule):
         return acc
 
 
-class Ensemble(torch.nn.Module):
+class Ensemble(LightningModule):
     """
     One network to rule them all
     """
@@ -150,30 +151,30 @@ class Ensemble(torch.nn.Module):
                                    'cpu')
 
     def __call__(self,
-                 data,
+                 img,
+                 target = None,
+                 isic_id = None,
+                 collection_path: str = None,
                  voting: str = 'hard',
-                 collect: bool = False,
-                 return_type: str = 'numpy'):
+                 onehot: bool = True
+                 ):
         """
         Make prediction using a majority voting
-        :param args:
-        :param kwargs:
-        :return:
         """
         assert voting in ['soft', 'hard'], "Voting has to be hard or soft!"
         assert type(collect) == bool, "Collect has to be a boolean!"
-        assert return_type in ['numpy', 'tensor', 'list'], "return_type must be numpy, tensor, or list!"
 
+        data_collection = pd.DataFrame(columns=['isic_id', 'target', 'prediction', 'model_idx'])
         
-        model_predictions = np.asarray([model.predict(data).numpy() for model in self.models])
+        model_predictions = self.get_model_predictions(img)
         ensemble_predictions = list()
-        # TODO: Implement soft vote
+
         if voting == 'soft':
+            # TODO: Implement soft vote
             # Get the average prediction for every datapoint and class. (Datapoint, Class)
             ensemble_predictions = np.mean(model_predictions, axis=0)
+
         if voting == 'hard':
-            cllt_datapoints = list()
-            cllt_labels = list()
             # Get the hard labels by each model. return shape = (Model, datapoint)
             hard_model_predictions = np.argmax(model_predictions, axis=-1)
             # Iterate over hard label list for each datapoint
@@ -183,32 +184,33 @@ class Ensemble(torch.nn.Module):
                 # Unanimous decision
                 if len(unique) == 1:
                     # Make decision
-                    ensemble_predictions.extend(np.eye(self.num_classes)[unique[0]])
+                    if onehot:
+                        ensemble_predictions.extend(np.eye(self.num_classes)[unique[0]])
+                    else:
+                        ensemble_predictions.extend(unique[0])
                     # Dont Collect data
 
                 # Majority Vote
                 if np.max(counts) >= (len(self.models) / 2):
                     # Make decision
                     majority_vote = unique[np.argmax(counts)]
-                    ensemble_predictions.extend(np.eye(self.num_classes)[majority_vote])
+                    if onehot:
+                        ensemble_predictions.extend(np.eye(self.num_classes)[majority_vote])
+                    else:
+                        ensemble_predictions.extend(majority_vote)
+                    minority_ids = [i for i, pred in enumerate(datapoint_preds) if pred != majority_vote]
                     # Collect data
                     if collect:
-                        cllt_datapoints.extend(x[i])
-                        cllt_labels.extend(majority_vote)
+                        data_collection.append({'isic_id': isic_id,
+                                                'target': target,
+                                                'prediction': np.argmax(ensemble_predictions[-1]),
+                                                'model_idx': minority_ids,
+                                                },
+                                               ignore_index=True)
 
-                # No majority
-                else:
-                    # TODO: Make dummy decision
+            data_collection.to_csv(collection_path, index=False, mode='a')
 
-                    # Collect miss
-                    self.collect_miss(data)
-
-        if return_type == 'tensor':
-            return torch.FloatTensor(ensemble_predictions).to(self.device)
-        elif return_type == 'numpy':
-            return np.asarray(ensemble_predictions)
-        elif return_type == 'list':
-            return ensemble_predictions
+        return ensemble_predictions
 
     def fit(self, epochs:int):
         """
@@ -216,7 +218,7 @@ class Ensemble(torch.nn.Module):
         :param dataset:
         :return:
         """
-        ###### DOESNT WORK AS WE OLY COLLECT image id and label #########
+        ###### DOESNT WORK AS WE ONLY COLLECT image id and label #########
         assert dataset is not None, "self.fine_tuning_data is None." \
                                     " Review a dataset to collect datapoints!"
         # For every model filter out relevant datapoints and fit it to them
@@ -224,29 +226,50 @@ class Ensemble(torch.nn.Module):
             model.fit(self.fine_tuning_data.filter(lambda im, pred, model, lbl: model == i),
                       epochs=epochs)
 
-    def get_model_predictions(self):
+    def get_model_predictions(self, data):
+        """Return a list of the predictions of the individual models"""
+        return np.asarray([model.predict(data).numpy() for model in self.models])
 
-    def test_ensemble(self, test_data, test_labels):
+    def test_ensemble(self, ds):
         """
         Test the performance of the ensemble on a test dataset
         """
-        pass
+        acc_total = 0
+        for i, img, target, isic_id in enumerate(ds):
+            preds = self(img, onehot=False)
+            # Collect accuracy
+            target_classes = np.argmax(target, dim=1)
+            correct_results_sum = (preds == target_classes).sum().float()
+            acc = correct_results_sum / target.shape[0]
+            acc_total = (acc_total + acc) / (i + 1)
 
-    def test_models(self, test_data, test_labels):
+        return acc_total
+
+    def test_models(self, ds):
         """
         Test the performance of each model on a test dataset
         """
-        pass
+        accs_total = [0.0] * len(self.models)
+        for i, img, target, isic_id in enumerate(ds):
+            probabilities = self.get_model_predictions(img)
+            target_classes = np.argmax(target, dim=1)
+            # Collect accuracy
+            for j, model_probs in enumerate(probabilities):
+                predicted_classes = np.argmax(model_probs, dim=1)
+                correct_results_sum = (predicted_classes == target_classes).sum().float()
+                acc = correct_results_sum / targets.shape[0]
+                accs_total[j] = (accs_total[j] + acc) / (i + 1)
 
-    def review_and_collect(self, dataset):
+        return accs_total
+
+    def classify_and_collect(self, dataset, collection_path, voting='hard'):
         """
         Make predictions on a dataset and collect continuous training data
-        :param dataset:
-        :return:
         """
-        predictions, models = self(dataset, return_type='')
-        pass
+        for img, target, isic_id in dataset:
+            self(img, target, isic_id, collection_path=collection_path, voting=voting)
 
+    # I THINK WE DONT CYCLE OR DO WE
     def cycle_offline(self, data, num_cycles, epochs_per_cycle, test_data):
         """
         Cycle over dataset. In each cycle review and collect data, and then fit the ensemble models on continuous

@@ -17,6 +17,7 @@ from utils import recommend_num_workers, recommend_max_batch_size
 
 from typing import Optional
 
+
 def slice_by_percentage(x, percentage, train=True):
     split = int(len(x) * percentage)
     if train:
@@ -40,6 +41,7 @@ class CustomImgFolderDataset(datasets.ImageFolder):
 
         return sample, target, path
 
+
 class CustomMetaDataset(Dataset):
     """This dataset samples an unbalanced binary classification dataset in a 50/50 fashion"""
 
@@ -48,7 +50,7 @@ class CustomMetaDataset(Dataset):
                  img_dir,
                  transform: transforms.Compose,
                  target_transform: transforms.Compose,
-                 attribution: str=None):
+                 attribution: str = None):
         super().__init__()
         self.df = pd.read_csv(meta_path, low_memory=False)
         if attribution:
@@ -87,9 +89,9 @@ class CustomMetaDatasetBalanced(Dataset):
                  img_dir,
                  transform: transforms.Compose,
                  target_transform: transforms.Compose,
-                 attribution: str=None,
-                 split: float=0.85,
-                 train: bool=True):
+                 attribution: str = None,
+                 split: float = 0.85,
+                 train: bool = True):
         super().__init__()
         df = pd.read_csv(meta_path, low_memory=False)
         if attribution:
@@ -253,7 +255,6 @@ class DataHandler:
                                      shuffle=True if train else False,
                                      num_workers=self.num_workers,
                                      pin_memory=True)
-
 
 
 if __name__ == "__main__":

@@ -146,6 +146,5 @@ if __name__ == "__main__":
                     num_workers='auto',
                     dataset_name='ISIC2024/train-image/image/',
                     meta_path='ISIC2024/train-metadata.csv',
-                    #precision="16-true",
                     attribution="Department of Dermatology, Hospital Clínic de Barcelona"
                    )
