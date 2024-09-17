@@ -119,7 +119,19 @@ def train_baseline_model(out_path: str = 'models',
                 dh_val.dataloader)
 
 
-def ssft():
+def ssft(out_path: str = 'models',
+         model_name: str = 'resnet18',
+         dataset_name: str = None,
+         meta_path: str = None,
+         device: str = 'cuda',
+         batch_size: int = None,
+         precision: int = 32,
+         num_workers: int = 1,
+         attribution: str = '',
+         height: int = 384,
+         width: int = 384,
+         local_ckeckpoint_path: str = None
+         ):
 
     models = [
         'resnet18/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-111109/',
@@ -148,7 +160,7 @@ def ssft():
                           attribution=attribution)
 
     ssft_datasets = [
-
+        "ahja"
     ]
 
 
@@ -161,7 +173,7 @@ if __name__ == "__main__":
               'densenet121',
               'densenet161',
               'densenet169',
-              #'densenet201',
+              'densenet201',
               'tf_efficientnet_b0',
               'vgg16',
               'inception_v3',
