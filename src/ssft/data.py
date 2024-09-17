@@ -17,7 +17,6 @@ from utils import recommend_num_workers, recommend_max_batch_size
 
 from typing import Optional
 
-
 def slice_by_percentage(x, percentage, train=True):
     split = int(len(x) * percentage)
     if train:
@@ -41,47 +40,6 @@ class CustomImgFolderDataset(datasets.ImageFolder):
 
         return sample, target, path
 
-
-class CustomMetaDatasetSSFT(Dataset):
-    """This dataset filters the collected data of a certain model for the selfsupervised finetuning"""
-
-    def __init__(self,
-                 meta_path,
-                 img_dir,
-                 transform: transforms.Compose,
-                 target_transform: transforms.Compose,
-                 model_id: int = None
-                 ):
-        super().__init__()
-        self.df = pd.read_csv(meta_path, low_memory=False)
-        if model_id:
-            self.df = self.df[self.df['model_idx'] == model_id]
-        self.targets = self.df['target'].values
-        self.image_ids = self.df['isic_id'].values
-
-        self.transform = transform
-        self.target_transform = target_transform
-        self.img_dir = img_dir
-        self.train = train
-        self.n_samples = len(self.df)
-
-    def __len__(self):
-        return self.n_samples
-
-    def __getitem__(self, idx):
-        # Get Image and target
-        img_id = self.image_ids[idx]
-        img = default_loader(os.path.join(self.img_dir, img_id + '.jpg'))
-        target = self.targets[idx]
-        # Transform if configured
-        if self.transform:
-            img = self.transform(img)
-        if self.target_transform:
-            target = self.target_transform(target)
-
-        return img, target, img_id
-
-
 class CustomMetaDataset(Dataset):
     """This dataset samples an unbalanced binary classification dataset in a 50/50 fashion"""
 
@@ -90,8 +48,7 @@ class CustomMetaDataset(Dataset):
                  img_dir,
                  transform: transforms.Compose,
                  target_transform: transforms.Compose,
-                 attribution: str = None,
-                 ):
+                 attribution: str=None):
         super().__init__()
         self.df = pd.read_csv(meta_path, low_memory=False)
         if attribution:
@@ -102,7 +59,6 @@ class CustomMetaDataset(Dataset):
         self.transform = transform
         self.target_transform = target_transform
         self.img_dir = img_dir
-        self.train = train
         self.n_samples = len(self.df)
 
     def __len__(self):
@@ -112,7 +68,7 @@ class CustomMetaDataset(Dataset):
         # Get Image and target
         img_id = self.image_ids[idx]
         img = default_loader(os.path.join(self.img_dir, img_id + '.jpg'))
-        target = self.targets[idx]
+        target = targets[idx]
         # Transform if configured
         if self.transform:
             img = self.transform(img)
@@ -120,7 +76,7 @@ class CustomMetaDataset(Dataset):
             target = self.target_transform(target)
             
         return img, target, img_id
-
+        
 
 class CustomMetaDatasetBalanced(Dataset):
     """This dataset samples an unbalanced binary classification dataset in a 50/50 fashion"""
@@ -130,9 +86,9 @@ class CustomMetaDatasetBalanced(Dataset):
                  img_dir,
                  transform: transforms.Compose,
                  target_transform: transforms.Compose,
-                 attribution: str = None,
-                 split: float = 0.85,
-                 train: bool = True):
+                 attribution: str=None,
+                 split: float=0.85,
+                 train: bool=True):
         super().__init__()
         df = pd.read_csv(meta_path, low_memory=False)
         if attribution:
@@ -194,8 +150,9 @@ class DataHandler:
                  data_dir: str = None,
                  meta_path: str = None,
                  train: bool=True,
-                 batch_size='auto',
-                 num_workers=1,
+                 batch_size = 'auto',
+                 shuffle: bool = True,
+                 num_workers = 1,
                  height: int = 450,
                  width: int = 600,
                  device: str = 'auto',
@@ -246,23 +203,16 @@ class DataHandler:
         # Metadata Version
         if self.meta_path:
             self.meta_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', self.meta_path)
-            if train:
-                self.dataset = CustomMetaDatasetBalanced(img_dir=self.data_dir,
-                                                         meta_path=self.meta_path,
-                                                         train=train,
-                                                         transform=self.transform if train else self.transform_val,
-                                                         target_transform=self.target_transform,
-                                                         attribution=attribution)
-            else:
-                self.dataset = CustomMetaDataset(img_dir=self.data_dir,
-                                                 meta_path=self.meta_path,
-                                                 transform=self.transform if train else self.transform_val,
-                                                 target_transform=self.target_transform,
-                                                 attribution=attribution)
+            self.dataset = CustomMetaDatasetBalanced(img_dir=self.data_dir,
+                                                     meta_path=self.meta_path,
+                                                     train=train,
+                                                     transform=self.transform if train else self.transform_val,
+                                                     target_transform=self.target_transform,
+                                                     attribution=attribution)
         # ImageFolders Version
         else:
             self.dataset = CustomImgFolderDataset(root=self.data_dir,
-                                                  transform=self.transform if train else self.transform_val,
+                                                  transform=self.transform  if train else self.transform_val,
                                                   target_transform=self.target_transform)
     
             # Balancing: Get class weight
@@ -302,6 +252,7 @@ class DataHandler:
                                      shuffle=True if train else False,
                                      num_workers=self.num_workers,
                                      pin_memory=True)
+
 
 
 if __name__ == "__main__":

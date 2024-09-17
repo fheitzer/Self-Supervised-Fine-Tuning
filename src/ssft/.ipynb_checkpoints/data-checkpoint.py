@@ -59,7 +59,6 @@ class CustomMetaDataset(Dataset):
         self.transform = transform
         self.target_transform = target_transform
         self.img_dir = img_dir
-        self.train = train
         self.n_samples = len(self.df)
 
     def __len__(self):

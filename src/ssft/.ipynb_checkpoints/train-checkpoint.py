@@ -53,7 +53,6 @@ def train_model(out_path: str = 'models',
                                   height=height,
                                   num_workers=num_workers,
                                   model_name=model_name,
-                                  shuffle=False,
                                   attribution=attribution)
     else:
         dh_train = data.DataHandler(data_dir=os.path.join(dataset_name, 'train/'),
@@ -75,8 +74,7 @@ def train_model(out_path: str = 'models',
     # Get the model
     model = LitResnet(model=model_name,
                       class_weights=None if meta_path else dh_train.class_weights,
-                      local_ckeckpoint_path=local_ckeckpoint_path,
-                      pretrained=True if local_ckeckpoint_path else None)
+                      local_ckeckpoint_path=local_ckeckpoint_path)
     # Define the callbacks
     callbacks = [ModelCheckpoint(save_dir + f"/{t}/",
                                  monitor='val_loss',
@@ -97,7 +95,8 @@ def train_model(out_path: str = 'models',
                     'num_workers': dh_train.num_workers,
                     'dataset_name': dataset_name,
                     'precision': precision,
-                    'attribution': attribution}
+                    'attribution': attribution
+                   }
     logger.log_hyperparams(extra_params)
 
     # set logging frequency to every epoch
@@ -132,6 +131,12 @@ if __name__ == "__main__":
               #'densenet201',
               'tf_efficientnet_b0',
               'vgg16',
+              'inception_v3',
+              'xception71',
+              'mobilenetv2_140',
+              'vit_base_patch16_224',
+             ]
+    models = ['vgg16',
               'inception_v3',
               'xception71',
               'mobilenetv2_140',

@@ -15,7 +15,7 @@ from timm.loss import BinaryCrossEntropy
 torch.set_float32_matmul_precision('medium')
 
 
-def train_baseline_model(out_path: str = 'models',
+def train_model(out_path: str = 'models', 
                 model_name: str = 'resnet18', 
                 dataset_name: str = None,
                 meta_path: str = None,
@@ -53,7 +53,6 @@ def train_baseline_model(out_path: str = 'models',
                                   height=height,
                                   num_workers=num_workers,
                                   model_name=model_name,
-                                  shuffle=False,
                                   attribution=attribution)
     else:
         dh_train = data.DataHandler(data_dir=os.path.join(dataset_name, 'train/'),
@@ -96,7 +95,8 @@ def train_baseline_model(out_path: str = 'models',
                     'num_workers': dh_train.num_workers,
                     'dataset_name': dataset_name,
                     'precision': precision,
-                    'attribution': attribution}
+                    'attribution': attribution
+                   }
     logger.log_hyperparams(extra_params)
 
     # set logging frequency to every epoch
@@ -119,51 +119,6 @@ def train_baseline_model(out_path: str = 'models',
                 dh_val.dataloader)
 
 
-def ssft(out_path: str = 'models',
-         model_name: str = 'resnet18',
-         dataset_name: str = None,
-         meta_path: str = None,
-         device: str = 'cuda',
-         batch_size: int = None,
-         precision: int = 32,
-         num_workers: int = 1,
-         attribution: str = '',
-         height: int = 384,
-         width: int = 384,
-         local_ckeckpoint_path: str = None
-         ):
-
-    models = [
-        'resnet18/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-111109/',
-        'resnet34/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-113254/',
-        'resnet50/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-115900/',
-        'resnet152/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-122913/',
-        'densenet121/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-131550/',
-        'densenet161/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-133332/',
-        'densenet169/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-140901/',
-        'densenet121/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-131550/',
-        'tf_efficientnet_b0/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-144144/',
-    ]
-
-    ensemble = Ensemble(models)
-
-    new_clinic = 'Memorial Sloan Kettering Cancer Center'
-
-    dh = data.DataHandler(data_dir=dataset_name,
-                          meta_path=meta_path,
-                          batch_size=batch_size,
-                          train=False,
-                          width=width,
-                          height=height,
-                          num_workers=num_workers,
-                          model_name=model_name,
-                          attribution=attribution)
-
-    ssft_datasets = [
-        "ahja"
-    ]
-
-
 if __name__ == "__main__":
     
     models = ['resnet18',
@@ -173,22 +128,29 @@ if __name__ == "__main__":
               'densenet121',
               'densenet161',
               'densenet169',
-              'densenet201',
+              #'densenet201',
               'tf_efficientnet_b0',
               'vgg16',
               'inception_v3',
               'xception71',
               'mobilenetv2_140',
               'vit_base_patch16_224',
-              ]
+             ]
+    models = ['vgg16',
+              'inception_v3',
+              'xception71',
+              'mobilenetv2_140',
+              'vit_base_patch16_224',
+             ]
     local_checkpoint_paths = []
     
     for model_name in models:
-        train_baseline_model(model_name=model_name,
-                             local_ckeckpoint_path=None,
-                             batch_size=32,
-                             num_workers='auto',
-                             dataset_name='ISIC2024/train-image/image/',
-                             meta_path='ISIC2024/train-metadata.csv',
-                             attribution="Department of Dermatology, Hospital Clínic de Barcelona"
-                             )
+        train_model(model_name=model_name,
+                    local_ckeckpoint_path=None,
+                    batch_size=32,
+                    num_workers='auto',
+                    dataset_name='ISIC2024/train-image/image/',
+                    meta_path='ISIC2024/train-metadata.csv',
+                    #precision="16-true",
+                    attribution="Department of Dermatology, Hospital Clínic de Barcelona"
+                   )
