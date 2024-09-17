@@ -134,18 +134,22 @@ def ssft(out_path: str = 'fine-tuning-data',
          ):
 
     models = [
-        'resnet18/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-111109/',
-        'resnet34/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-113254/',
-        'resnet50/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-115900/',
-        'resnet152/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-122913/',
-        'densenet121/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-131550/',
-        'densenet161/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-133332/',
-        'densenet169/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-140901/',
-        'densenet121/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-131550/',
-        'tf_efficientnet_b0/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-144144/',
+        'resnet18/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-111109/epoch=279-val_loss=0.20-val_accuracy=0.9998.ckpt',
+        #'resnet34/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-113254/epoch=279-val_loss=0.32-val_accuracy=0.9996.ckpt',
+        #'resnet50/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-115900/epoch=319-val_loss=0.11-val_accuracy=0.9996.ckpt',
+        #'resnet152/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-122913/epoch=199-val_loss=0.14-val_accuracy=0.9997.ckpt',
+        #'densenet121/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-131550/epoch=19-val_loss=0.02-val_accuracy=0.9994.ckpt',
+        #'densenet161/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-133332/epoch=79-val_loss=0.21-val_accuracy=0.9996.ckpt',
+        'densenet169/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-140901/epoch=159-val_loss=0.04-val_accuracy=0.9993.ckpt',
+        'densenet201/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-092802/epoch=279-val_loss=0.01-val_accuracy=0.9996.ckpt',
+        #'tf_efficientnet_b0/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-144144/',
+        'vgg16/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-183914/epoch=379-val_loss=0.01-val_accuracy=0.9997.ckpt',
+        'inception_v3/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-193502/epoch=199-val_loss=0.00-val_accuracy=0.9996.ckpt',
+        #'xception71/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-195936/epoch=119-val_loss=0.35-val_accuracy=0.9992.ckpt',
+        #'mobilenetv2_140/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-204319/epoch=219-val_loss=0.00-val_accuracy=1.0000.ckpt',
     ]
 
-    ensemble = Ensemble(models)
+    ensemble = Ensemble(models=models)
 
     new_clinic = 'Memorial Sloan Kettering Cancer Center'
 
@@ -180,6 +184,9 @@ def ssft(out_path: str = 'fine-tuning-data',
 
 
 if __name__ == "__main__":
+
+    ssft()
+    exit()
     
     models = ['resnet18',
               'resnet34',

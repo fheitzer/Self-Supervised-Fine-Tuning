@@ -136,13 +136,13 @@ class Ensemble(LightningModule):
     def __init__(self,
                  models: list[LightningModule]):
         super(Ensemble, self).__init__()
+        self.models = models
         if models and all(isinstance(model, LightningModule) for model in models):
             self.models = models
         elif models and all(isinstance(model, str) for model in models):
             self.load_models(models)
         else:
             raise Exception("Models must be specified as lightning.LightningModule list")
-        self.models = models
         self.fine_tuning_data = None
         self.missed_data = None
         self.num_classes = models[0].num_classes

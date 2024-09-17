@@ -1,3 +1,4 @@
+import pandas as pd
 import torch
 import timm
 from pytorch_lightning import LightningModule, Trainer, seed_everything
@@ -34,19 +35,21 @@ class LitResnet(LightningModule):
                  weight_decay: float=1e-6,
                  model: str='tf_efficientnet_b0',
                  local_ckeckpoint_path: str = None,
-                 pretrained=False,
                  global_pool="catavgmax",
                  num_classes=2,
-                 features_only=False,
                  class_weights=None):
         super().__init__()
         self.save_hyperparameters()
+        self.model_name = model
+
+        if model == 'vit_base_patch16_224':
+            global_pool = 'avg'
         
-        if local_ckeckpoint_path:
+        if local_ckeckpoint_path and isinstance(local_ckeckpoint_path, str):
             local_ckeckpoint_path = {'file': local_ckeckpoint_path}
         self.model = timm.create_model(model,
-                                       pretrained=pretrained,
-                                       pretrained_cfg=local_ckeckpoint_path,
+                                       pretrained=True if local_ckeckpoint_path else False,
+                                       pretrained_cfg_overlay=local_ckeckpoint_path,
                                        global_pool=global_pool,
                                        num_classes=num_classes,
                                       )
@@ -64,7 +67,6 @@ class LitResnet(LightningModule):
         # Where used?
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
-
 
     def forward(self, x):
         logits = self.model(x)
@@ -84,8 +86,6 @@ class LitResnet(LightningModule):
         loss = self.criterion(outputs, targets)
         accuracy = self.binary_accuracy(outputs, targets)
         batch_size = targets.size(dim=0)
-        #scheduler = self.lr_schedulers()
-        #scheduler.step()
         self.log('train_accuracy', accuracy, prog_bar=True, batch_size=batch_size)
         self.log('train_loss', loss, prog_bar=True, batch_size=batch_size)
         return loss
@@ -128,7 +128,7 @@ class LitResnet(LightningModule):
         return acc
 
 
-class Ensemble(torch.nn.Module):
+class Ensemble(LightningModule):
     """
     One network to rule them all
     """
@@ -136,11 +136,13 @@ class Ensemble(torch.nn.Module):
     def __init__(self,
                  models: list[LightningModule]):
         super(Ensemble, self).__init__()
-        if models and all(isinstance(s, LightningModule) for s in lis):
+        self.models = models
+        if models and all(isinstance(model, LightningModule) for model in models):
             self.models = models
+        elif models and all(isinstance(model, str) for model in models):
+            self.load_models(models)
         else:
             raise Exception("Models must be specified as lightning.LightningModule list")
-        self.models = models
         self.fine_tuning_data = None
         self.missed_data = None
         self.num_classes = models[0].num_classes
@@ -149,31 +151,39 @@ class Ensemble(torch.nn.Module):
                                    'mps' if torch.backends.mps.is_available() else
                                    'cpu')
 
+    def load_models(self, models):
+        for model_path in models:
+            model_name = model_path.split('/')[0]
+            self.models.append(LitResnet(model=model_name,
+                                         local_ckeckpoint_path=model_path,
+                                         )
+                               )
+
     def __call__(self,
-                 data,
+                 img,
+                 target=None,
+                 isic_id=None,
+                 collection_path: str = None,
                  voting: str = 'hard',
-                 collect: bool = False,
-                 return_type: str = 'numpy'):
+                 onehot: bool = True
+                 ):
         """
         Make prediction using a majority voting
-        :param args:
-        :param kwargs:
-        :return:
         """
         assert voting in ['soft', 'hard'], "Voting has to be hard or soft!"
         assert type(collect) == bool, "Collect has to be a boolean!"
-        assert return_type in ['numpy', 'tensor', 'list'], "return_type must be numpy, tensor, or list!"
 
+        data_collection = pd.DataFrame(columns=['isic_id', 'target', 'prediction', 'model_idx'])
         
-        model_predictions = np.asarray([model.predict(data).numpy() for model in self.models])
+        model_predictions = self.get_model_predictions(img)
         ensemble_predictions = list()
-        # TODO: Implement soft vote
+
         if voting == 'soft':
+            # TODO: Implement soft vote
             # Get the average prediction for every datapoint and class. (Datapoint, Class)
             ensemble_predictions = np.mean(model_predictions, axis=0)
+
         if voting == 'hard':
-            cllt_datapoints = list()
-            cllt_labels = list()
             # Get the hard labels by each model. return shape = (Model, datapoint)
             hard_model_predictions = np.argmax(model_predictions, axis=-1)
             # Iterate over hard label list for each datapoint
@@ -183,135 +193,85 @@ class Ensemble(torch.nn.Module):
                 # Unanimous decision
                 if len(unique) == 1:
                     # Make decision
-                    ensemble_predictions.extend(np.eye(self.num_classes)[unique[0]])
+                    if onehot:
+                        ensemble_predictions.extend(np.eye(self.num_classes)[unique[0]])
+                    else:
+                        ensemble_predictions.extend(unique[0])
                     # Dont Collect data
 
                 # Majority Vote
                 if np.max(counts) >= (len(self.models) / 2):
                     # Make decision
                     majority_vote = unique[np.argmax(counts)]
-                    ensemble_predictions.extend(np.eye(self.num_classes)[majority_vote])
+                    if onehot:
+                        ensemble_predictions.extend(np.eye(self.num_classes)[majority_vote])
+                    else:
+                        ensemble_predictions.extend(majority_vote)
+                    minority_ids = [i for i, pred in enumerate(datapoint_preds) if pred != majority_vote]
                     # Collect data
                     if collect:
-                        cllt_datapoints.extend(x[i])
-                        cllt_labels.extend(majority_vote)
+                        for model_id in minority_ids:
+                            data_collection.append({'isic_id': isic_id,
+                                                    'target': target,
+                                                    'prediction': np.argmax(ensemble_predictions[-1]),
+                                                    'model_idx': model_id,
+                                                    },
+                                                   ignore_index=True)
+            collection_path = os.path.join(os.path.abspath('fine-tune-data'), collection_path)
+            data_collection.to_csv(collection_path, index=False, mode='a')
 
-                # No majority
-                else:
-                    # TODO: Make dummy decision
+        return ensemble_predictions
 
-                    # Collect miss
-                    self.collect_miss(data)
-
-        if return_type == 'tensor':
-            return torch.FloatTensor(ensemble_predictions).to(self.device)
-        elif return_type == 'numpy':
-            return np.asarray(ensemble_predictions)
-        elif return_type == 'list':
-            return ensemble_predictions
-
-    def fit(self, epochs:int):
+    def fit(self, ds, epochs:int):
         """
         Fit the models of the ensemble to a dataset or to the continuous training data collected by the ensemble
         :param dataset:
         :return:
         """
-        ###### DOESNT WORK AS WE OLY COLLECT image id and label #########
-        assert dataset is not None, "self.fine_tuning_data is None." \
-                                    " Review a dataset to collect datapoints!"
         # For every model filter out relevant datapoints and fit it to them
         for i, model in enumerate(self.models):
             model.fit(self.fine_tuning_data.filter(lambda im, pred, model, lbl: model == i),
                       epochs=epochs)
 
-    def get_model_predictions(self):
+    def get_model_predictions(self, data):
+        """Return a list of the predictions of the individual models"""
+        return np.asarray([model.predict(data).numpy() for model in self.models])
 
-    def test_ensemble(self, test_data, test_labels):
+    def test_ensemble(self, ds):
         """
         Test the performance of the ensemble on a test dataset
         """
-        pass
+        acc_total = 0
+        for i, img, target, isic_id in enumerate(ds):
+            preds = self(img, onehot=False)
+            # Collect accuracy
+            target_classes = np.argmax(target, dim=1)
+            correct_results_sum = (preds == target_classes).sum().float()
+            acc = correct_results_sum / target.shape[0]
+            acc_total = (acc_total + acc) / (i + 1)
 
-    def test_models(self, test_data, test_labels):
+        return acc_total
+
+    def test_models(self, ds):
         """
         Test the performance of each model on a test dataset
         """
-        pass
+        accs_total = [0.0] * len(self.models)
+        for i, img, target, isic_id in enumerate(ds):
+            probabilities = self.get_model_predictions(img)
+            target_classes = np.argmax(target, dim=1)
+            # Collect accuracy
+            for j, model_probs in enumerate(probabilities):
+                predicted_classes = np.argmax(model_probs, dim=1)
+                correct_results_sum = (predicted_classes == target_classes).sum().float()
+                acc = correct_results_sum / targets.shape[0]
+                accs_total[j] = (accs_total[j] + acc) / (i + 1)
 
-    def review_and_collect(self, dataset):
+        return accs_total
+
+    def classify_and_collect(self, dataset, collection_path, voting='hard'):
         """
         Make predictions on a dataset and collect continuous training data
-        :param dataset:
-        :return:
         """
-        predictions, models = self(dataset, return_type='')
-        pass
-
-    def cycle_offline(self, data, num_cycles, epochs_per_cycle, test_data):
-        """
-        Cycle over dataset. In each cycle review and collect data, and then fit the ensemble models on continuous
-        training data. Repeat cycles and hope for performance increase on passed dataset
-        :param data:
-        :return:
-        """
-        for i in num_cycles:
-            if test:
-                self.test(test_data)
-            _ = self(data, collect=True)
-            self.fit(epochs=epochs_per_cycle)
-            self.reset_data()
-
-    def collect_continuous_training_data(self, x, pred):
-        """Add the current datapoint to self.data
-        with the index of the model that needs to be trained on that datapoint
-        and the label predicted by the other networks.
-        """
-        pass
-        #img = tf.data.Dataset.from_tensor_slices(x)
-        #pred = tf.data.Dataset.from_tensor_slices(pred)
-        #datapoint = tf.data.Dataset.zip((img, pred))
-        #if self.fine_tuning_data is None:
-         #   self.fine_tuning_data = datapoint
-        #else:
-         #   self.fine_tuning_data = self.fine_tuning_data.concatenate(datapoint)
-
-    def collect_miss(self, x, y):
-        """Collect a datapoint which could not be determined.
-        Review by hand later.
-        """
-        pass
-        #img = tf.data.Dataset.from_tensor_slices([x])
-        #if self.missed_data is None:
-         #   self.missed_data = datapoint
-        #else:
-         #   self.missed_data = self.missed_data.concatenate(datapoint)
-
-    def load_data(self, filepath):
-        pass
-        #self.set_continuous_training_data(
-         #   tf.data.experimental.load(filepath[0],
-          #                            compression='GZIP',
-           #                           element_spec=self.continuous_data_spec))
-        #self.set_missed_data(
-         #   tf.data.experimental.load(filepath[1],
-          #                            compression='GZIP',
-           #                           element_spec=self.missed_data_spec))
-
-    def reset_data(self):
-        """Data should be reset after each posttraining."""
-        self.fine_tuning_data = None
-        self.missed_data = None
-
-    def get_continuous_training_data(self):
-        return self.fine_tuning_data
-
-    def set_continuous_training_data(self, ds):
-        self.fine_tuning_data = ds
-
-    def get_missed_data(self):
-        return self.missed_data
-
-    def set_missed_data(self, ds):
-        self.missed_data = ds
-
-
+        for img, target, isic_id in dataset:
+            self(img, target, isic_id, collection_path=collection_path, voting=voting)
