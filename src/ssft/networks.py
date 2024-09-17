@@ -4,6 +4,7 @@ import timm
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 import numpy as np
 from torch import nn, optim
+import os
 
 from PIL import Image
 
@@ -154,10 +155,9 @@ class Ensemble(LightningModule):
     def load_models(self, models):
         for model_path in models:
             model_name = model_path.split('/')[0]
-            self.models.append(LitResnet(model=model_name,
-                                         local_ckeckpoint_path=model_path,
-                                         )
-                               )
+            model_path = os.path.abspath(os.path.join('models', model_path))
+            model = LitResnet.load_from_checkpoint(model_path)
+            self.models.append(model)
 
     def __call__(self,
                  img,
