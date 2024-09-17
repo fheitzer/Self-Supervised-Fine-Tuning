@@ -85,12 +85,11 @@ class LitResnet(LightningModule):
 
     def predict(self, x):
         logits = self.model(x)
-        pred = self.softmaxs(logits, dim=1)
+        pred = self.out_activation(logits, dim=1)
         return pred
 
     def training_step(self, batch, batch_idx):
         # Define training step for Trainer Module
-        # Example
         samples, targets, _ = batch
         outputs = self.forward(samples)
         loss = self.criterion(outputs, targets)
@@ -123,8 +122,8 @@ class LitResnet(LightningModule):
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer,
-                                                   T_max=500, 
-                                                   eta_min=1e-6)
+                                                         T_max=500, 
+                                                         eta_min=1e-6)
         return {'optimizer': optimizer,
                 'lr_scheduler': {'scheduler': scheduler,
                                  'interval': 'step',

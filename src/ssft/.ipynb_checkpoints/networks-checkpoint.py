@@ -90,7 +90,6 @@ class LitResnet(LightningModule):
 
     def training_step(self, batch, batch_idx):
         # Define training step for Trainer Module
-        # Example
         samples, targets, _ = batch
         outputs = self.forward(samples)
         loss = self.criterion(outputs, targets)

@@ -108,7 +108,7 @@ def train_model(out_path: str = 'models',
                       logger=logger,
                       log_every_n_steps=logging_frequency,
                       check_val_every_n_epoch=20,
-                      precision=precision,
+                      #precision=precision,
                       min_epochs=100
                       )
     # Train
