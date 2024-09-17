@@ -254,7 +254,6 @@ class DataHandler:
                                      pin_memory=True)
 
 
-
 if __name__ == "__main__":
     dh = DataHandler(data_dir='isic1920_fil_split/train/', num_workers=1)
     s, t, p = next(iter(dh.dataloader))

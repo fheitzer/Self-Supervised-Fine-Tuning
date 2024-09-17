@@ -41,6 +41,9 @@ class LitResnet(LightningModule):
         super().__init__()
         self.save_hyperparameters()
         self.model_name = model
+
+        if model == 'vit_base_patch16_224':
+            global_pool = 'avg'
         
         if local_ckeckpoint_path and isinstance(local_ckeckpoint_path, str):
             local_ckeckpoint_path = {'file': local_ckeckpoint_path}
@@ -83,8 +86,6 @@ class LitResnet(LightningModule):
         loss = self.criterion(outputs, targets)
         accuracy = self.binary_accuracy(outputs, targets)
         batch_size = targets.size(dim=0)
-        #scheduler = self.lr_schedulers()
-        #scheduler.step()
         self.log('train_accuracy', accuracy, prog_bar=True, batch_size=batch_size)
         self.log('train_loss', loss, prog_bar=True, batch_size=batch_size)
         return loss
@@ -155,7 +156,7 @@ class Ensemble(LightningModule):
             model_name = model_path.split('/')[0]
             self.models.append(LitResnet(model=model_name,
                                          local_ckeckpoint_path=model_path,
-                                         pretrained=True)
+                                         )
                                )
 
     def __call__(self,
@@ -216,7 +217,7 @@ class Ensemble(LightningModule):
                                                     'model_idx': model_id,
                                                     },
                                                    ignore_index=True)
-
+            collection_path = os.path.join(os.path.abspath('fine-tune-data'), collection_path)
             data_collection.to_csv(collection_path, index=False, mode='a')
 
         return ensemble_predictions
@@ -274,4 +275,3 @@ class Ensemble(LightningModule):
         """
         for img, target, isic_id in dataset:
             self(img, target, isic_id, collection_path=collection_path, voting=voting)
-
