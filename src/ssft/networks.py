@@ -137,8 +137,10 @@ class Ensemble(LightningModule):
     def __init__(self,
                  models: list[LightningModule]):
         super(Ensemble, self).__init__()
-        if models and all(isinstance(s, LightningModule) for s in lis):
+        if models and all(isinstance(model, LightningModule) for model in models):
             self.models = models
+        elif models and all(isinstance(model, str) for model in models):
+            self.load_models(models)
         else:
             raise Exception("Models must be specified as lightning.LightningModule list")
         self.models = models
@@ -150,10 +152,18 @@ class Ensemble(LightningModule):
                                    'mps' if torch.backends.mps.is_available() else
                                    'cpu')
 
+    def load_models(self, models):
+        for model in models:
+            self.models.append(LitResnet(model=model,
+                                         #class_weights=None if meta_path else dh_train.class_weights,
+                                         local_ckeckpoint_path=local_ckeckpoint_path,
+                                         pretrained=True if local_ckeckpoint_path else None)
+                               )
+
     def __call__(self,
                  img,
-                 target = None,
-                 isic_id = None,
+                 target=None,
+                 isic_id=None,
                  collection_path: str = None,
                  voting: str = 'hard',
                  onehot: bool = True
@@ -201,26 +211,24 @@ class Ensemble(LightningModule):
                     minority_ids = [i for i, pred in enumerate(datapoint_preds) if pred != majority_vote]
                     # Collect data
                     if collect:
-                        data_collection.append({'isic_id': isic_id,
-                                                'target': target,
-                                                'prediction': np.argmax(ensemble_predictions[-1]),
-                                                'model_idx': minority_ids,
-                                                },
-                                               ignore_index=True)
+                        for model_id in minority_ids:
+                            data_collection.append({'isic_id': isic_id,
+                                                    'target': target,
+                                                    'prediction': np.argmax(ensemble_predictions[-1]),
+                                                    'model_idx': model_id,
+                                                    },
+                                                   ignore_index=True)
 
             data_collection.to_csv(collection_path, index=False, mode='a')
 
         return ensemble_predictions
 
-    def fit(self, epochs:int):
+    def fit(self, ds, epochs:int):
         """
         Fit the models of the ensemble to a dataset or to the continuous training data collected by the ensemble
         :param dataset:
         :return:
         """
-        ###### DOESNT WORK AS WE ONLY COLLECT image id and label #########
-        assert dataset is not None, "self.fine_tuning_data is None." \
-                                    " Review a dataset to collect datapoints!"
         # For every model filter out relevant datapoints and fit it to them
         for i, model in enumerate(self.models):
             model.fit(self.fine_tuning_data.filter(lambda im, pred, model, lbl: model == i),
@@ -268,73 +276,4 @@ class Ensemble(LightningModule):
         """
         for img, target, isic_id in dataset:
             self(img, target, isic_id, collection_path=collection_path, voting=voting)
-
-    # I THINK WE DONT CYCLE OR DO WE
-    def cycle_offline(self, data, num_cycles, epochs_per_cycle, test_data):
-        """
-        Cycle over dataset. In each cycle review and collect data, and then fit the ensemble models on continuous
-        training data. Repeat cycles and hope for performance increase on passed dataset
-        :param data:
-        :return:
-        """
-        for i in num_cycles:
-            if test:
-                self.test(test_data)
-            _ = self(data, collect=True)
-            self.fit(epochs=epochs_per_cycle)
-            self.reset_data()
-
-    def collect_continuous_training_data(self, x, pred):
-        """Add the current datapoint to self.data
-        with the index of the model that needs to be trained on that datapoint
-        and the label predicted by the other networks.
-        """
-        pass
-        #img = tf.data.Dataset.from_tensor_slices(x)
-        #pred = tf.data.Dataset.from_tensor_slices(pred)
-        #datapoint = tf.data.Dataset.zip((img, pred))
-        #if self.fine_tuning_data is None:
-         #   self.fine_tuning_data = datapoint
-        #else:
-         #   self.fine_tuning_data = self.fine_tuning_data.concatenate(datapoint)
-
-    def collect_miss(self, x, y):
-        """Collect a datapoint which could not be determined.
-        Review by hand later.
-        """
-        pass
-        #img = tf.data.Dataset.from_tensor_slices([x])
-        #if self.missed_data is None:
-         #   self.missed_data = datapoint
-        #else:
-         #   self.missed_data = self.missed_data.concatenate(datapoint)
-
-    def load_data(self, filepath):
-        pass
-        #self.set_continuous_training_data(
-         #   tf.data.experimental.load(filepath[0],
-          #                            compression='GZIP',
-           #                           element_spec=self.continuous_data_spec))
-        #self.set_missed_data(
-         #   tf.data.experimental.load(filepath[1],
-          #                            compression='GZIP',
-           #                           element_spec=self.missed_data_spec))
-
-    def reset_data(self):
-        """Data should be reset after each posttraining."""
-        self.fine_tuning_data = None
-        self.missed_data = None
-
-    def get_continuous_training_data(self):
-        return self.fine_tuning_data
-
-    def set_continuous_training_data(self, ds):
-        self.fine_tuning_data = ds
-
-    def get_missed_data(self):
-        return self.missed_data
-
-    def set_missed_data(self, ds):
-        self.missed_data = ds
-
 

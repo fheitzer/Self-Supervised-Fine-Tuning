@@ -42,6 +42,46 @@ class CustomImgFolderDataset(datasets.ImageFolder):
         return sample, target, path
 
 
+class CustomMetaDatasetSSFT(Dataset):
+    """This dataset filters the collected data of a certain model for the selfsupervised finetuning"""
+
+    def __init__(self,
+                 meta_path,
+                 img_dir,
+                 transform: transforms.Compose,
+                 target_transform: transforms.Compose,
+                 model_id: int = None
+                 ):
+        super().__init__()
+        self.df = pd.read_csv(meta_path, low_memory=False)
+        if model_id:
+            self.df = self.df[self.df['model_idx'] == model_id]
+        self.targets = self.df['target'].values
+        self.image_ids = self.df['isic_id'].values
+
+        self.transform = transform
+        self.target_transform = target_transform
+        self.img_dir = img_dir
+        self.train = train
+        self.n_samples = len(self.df)
+
+    def __len__(self):
+        return self.n_samples
+
+    def __getitem__(self, idx):
+        # Get Image and target
+        img_id = self.image_ids[idx]
+        img = default_loader(os.path.join(self.img_dir, img_id + '.jpg'))
+        target = self.targets[idx]
+        # Transform if configured
+        if self.transform:
+            img = self.transform(img)
+        if self.target_transform:
+            target = self.target_transform(target)
+
+        return img, target, img_id
+
+
 class CustomMetaDataset(Dataset):
     """This dataset samples an unbalanced binary classification dataset in a 50/50 fashion"""
 
@@ -50,7 +90,8 @@ class CustomMetaDataset(Dataset):
                  img_dir,
                  transform: transforms.Compose,
                  target_transform: transforms.Compose,
-                 attribution: str = None):
+                 attribution: str = None,
+                 ):
         super().__init__()
         self.df = pd.read_csv(meta_path, low_memory=False)
         if attribution:
@@ -71,7 +112,7 @@ class CustomMetaDataset(Dataset):
         # Get Image and target
         img_id = self.image_ids[idx]
         img = default_loader(os.path.join(self.img_dir, img_id + '.jpg'))
-        target = targets[idx]
+        target = self.targets[idx]
         # Transform if configured
         if self.transform:
             img = self.transform(img)
@@ -79,7 +120,7 @@ class CustomMetaDataset(Dataset):
             target = self.target_transform(target)
             
         return img, target, img_id
-        
+
 
 class CustomMetaDatasetBalanced(Dataset):
     """This dataset samples an unbalanced binary classification dataset in a 50/50 fashion"""

@@ -15,7 +15,7 @@ from timm.loss import BinaryCrossEntropy
 torch.set_float32_matmul_precision('medium')
 
 
-def train_model(out_path: str = 'models', 
+def train_baseline_model(out_path: str = 'models',
                 model_name: str = 'resnet18', 
                 dataset_name: str = None,
                 meta_path: str = None,
@@ -120,6 +120,23 @@ def train_model(out_path: str = 'models',
                 dh_val.dataloader)
 
 
+def ssft():
+
+    models = [
+        'resnet18/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-111109/',
+        'resnet34/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-113254/',
+        'resnet50/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-115900/',
+        'resnet152/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-122913/',
+        'densenet121/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-131550/',
+        'densenet161/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-133332/',
+        'densenet169/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-140901/',
+        'densenet121/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-131550/',
+        'tf_efficientnet_b0/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-144144/',
+    ]
+
+    ensemble = Ensemble(models)
+
+
 if __name__ == "__main__":
     
     models = ['resnet18',
@@ -136,15 +153,15 @@ if __name__ == "__main__":
               'xception71',
               'mobilenetv2_140',
               'vit_base_patch16_224',
-             ]
+              ]
     local_checkpoint_paths = []
     
     for model_name in models:
-        train_model(model_name=model_name,
-                    local_ckeckpoint_path=None,
-                    batch_size=32,
-                    num_workers='auto',
-                    dataset_name='ISIC2024/train-image/image/',
-                    meta_path='ISIC2024/train-metadata.csv',
-                    attribution="Department of Dermatology, Hospital Clínic de Barcelona"
-                   )
+        train_baseline_model(model_name=model_name,
+                             local_ckeckpoint_path=None,
+                             batch_size=32,
+                             num_workers='auto',
+                             dataset_name='ISIC2024/train-image/image/',
+                             meta_path='ISIC2024/train-metadata.csv',
+                             attribution="Department of Dermatology, Hospital Clínic de Barcelona"
+                             )
