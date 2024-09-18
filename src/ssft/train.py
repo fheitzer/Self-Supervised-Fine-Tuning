@@ -121,13 +121,12 @@ def train_baseline_model(out_path: str = 'models',
 
 def ssft(out_path: str = 'fine-tuning-data',
          model_name: str = 'resnet18',
-         dataset_name: str = None,
-         meta_path: str = None,
+         dataset_name: str = 'ISIC2024/train-image/image/',
+         meta_path: str = 'ISIC2024/train-metadata.csv',
          device: str = 'cuda',
-         batch_size: int = None,
+         batch_size: int = 16,
          precision: int = 32,
-         num_workers: int = 1,
-         attribution: str = '',
+         num_workers: int = 0,
          height: int = 384,
          width: int = 384,
          local_ckeckpoint_path: str = None
@@ -150,33 +149,45 @@ def ssft(out_path: str = 'fine-tuning-data',
     ]
 
     ensemble = Ensemble(models=models)
+    
+    new_clinics = ["Department of Dermatology, Hospital Clínic de Barcelona",
+                   'Memorial Sloan Kettering Cancer Center'
+                   'University Hospital of Basel',
+                   'Frazer Institute, The University of Queensland, Dermatology Research Centre',
+                   'ACEMID MIA',
+                   'ViDIR Group, Department of Dermatology, Medical University of Vienna',
+                   'Department of Dermatology, University of Athens, Andreas Syggros Hospital of Skin and Venereal Diseases, Alexander Stratigos, Konstantinos Liopyris',
+                  ]
 
-    new_clinic = 'Memorial Sloan Kettering Cancer Center'
-
-
-
-    dh = data.DataHandler(data_dir=dataset_name,
-                          meta_path=meta_path,
-                          batch_size=batch_size,
-                          train=False,
-                          width=width,
-                          height=height,
-                          num_workers=8,
-                          model_name=model_name,
-                          attribution=new_clinic)
-
-    save_path = os.path.join(os.path.abspath(out_path), model_name, dataset_name, attribution)
-
-    models_start_acc = ensemble.test_models(ds)
-    ensemble_start_acc = ensemble.test_ensemble(ds)
-    print(models_start_acc)
-    print(ensemble_start_acc)
+    # Testing starting accuracy
+    for clinic in new_clinics:
+    
+        dh = data.DataHandler(data_dir=dataset_name,
+                              meta_path=meta_path,
+                              batch_size=batch_size,
+                              train=False,
+                              width=width,
+                              height=height,
+                              num_workers=8,
+                              model_name=model_name,
+                              attribution=clinic,
+                              device='auto'
+                             )
+        print(f'New Clinic: {clinic}')
+        ensemble_start_acc = ensemble.test_ensemble(dh.dataloader)
+        print(ensemble_start_acc)
+        models_start_acc = ensemble.test_models(dh.dataloader)
+        print(models_start_acc)
+    
+        save_path = os.path.join(os.path.abspath(out_path), model_name, dataset_name, clinic)
+    
     exit()
-
+    # Take this to the loop
+    # Get Self Supervised Labels
     ensemble.classify_and_collect(dh, save_path)
+    # Perform one round of fine tuning
 
-
-
+    # Test the ensemble and models again
 
     ssft_datasets = [
         "ahja",

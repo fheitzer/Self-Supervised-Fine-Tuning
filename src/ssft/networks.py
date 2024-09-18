@@ -5,6 +5,7 @@ from pytorch_lightning import LightningModule, Trainer, seed_everything
 import numpy as np
 from torch import nn, optim
 import os
+from tqdm import tqdm
 
 from PIL import Image
 
@@ -135,22 +136,26 @@ class Ensemble(LightningModule):
     """
 
     def __init__(self,
-                 models: list[LightningModule]):
+                 models = None):
         super(Ensemble, self).__init__()
-        self.models = models
+        self.models = list()
         if models and all(isinstance(model, LightningModule) for model in models):
             self.models = models
         elif models and all(isinstance(model, str) for model in models):
             self.load_models(models)
         else:
-            raise Exception("Models must be specified as lightning.LightningModule list")
+            raise Exception("Models must be specified as lightning.LightningModule list or str list giving checkpoint paths")
+        self.device_to_be = torch.device('cuda' if torch.cuda.is_available() else
+                                         'mps' if torch.backends.mps.is_available() else
+                                         'cpu')
+        self.send_models_to_device()
+
+        
+        
         self.fine_tuning_data = None
         self.missed_data = None
-        self.num_classes = models[0].num_classes
+        self.num_classes = self.models[0].num_classes
         self.acc = None
-        self.device = torch.device('cuda' if torch.cuda.is_available() else
-                                   'mps' if torch.backends.mps.is_available() else
-                                   'cpu')
 
     def load_models(self, models):
         for model_path in models:
@@ -159,74 +164,90 @@ class Ensemble(LightningModule):
             model = LitResnet.load_from_checkpoint(model_path)
             self.models.append(model)
 
+    def send_models_to_device(self):
+        for model in self.models:
+            model.to(self.device_to_be)
+
     def __call__(self,
-                 img,
-                 target=None,
-                 isic_id=None,
-                 collection_path: str = None,
-                 voting: str = 'hard',
-                 onehot: bool = True
-                 ):
+             img,
+             target=None,
+             isic_id=None,
+             collection_path: str = None,
+             voting: str = 'hard',
+             onehot: bool = True,
+             collect: bool = False  # Adding collect as an argument
+             ):
         """
         Make prediction using a majority voting
         """
         assert voting in ['soft', 'hard'], "Voting has to be hard or soft!"
-        assert type(collect) == bool, "Collect has to be a boolean!"
-
+    
+        img = img.to(self.device_to_be)
+        if target is not None:
+            target = target.to(self.device_to_be)
+        
         data_collection = pd.DataFrame(columns=['isic_id', 'target', 'prediction', 'model_idx'])
         
-        model_predictions = self.get_model_predictions(img)
-        ensemble_predictions = list()
-
+        # Get model predictions (this should return a tensor of model outputs)
+        model_predictions = self.get_model_predictions(img)  # Expecting this to return a single tensor
+        ensemble_predictions = []
+    
         if voting == 'soft':
-            # TODO: Implement soft vote
-            # Get the average prediction for every datapoint and class. (Datapoint, Class)
-            ensemble_predictions = np.mean(model_predictions, axis=0)
-
+            # Average the model predictions (soft voting)
+            ensemble_predictions = torch.mean(model_predictions, dim=0)
+    
         if voting == 'hard':
-            # Get the hard labels by each model. return shape = (Model, datapoint)
-            hard_model_predictions = np.argmax(model_predictions, axis=-1)
+            # Get hard labels from each model (shape: (Model, Datapoint))
+            hard_model_predictions = torch.argmax(model_predictions, dim=-1)
+            
             # Iterate over hard label list for each datapoint
-            for i, datapoint_preds in enumerate(np.transpose(hard_model_predictions)):
-                # Get the unique classes voted for and how often
-                unique, counts = np.unique(datapoint_preds, return_counts=True, axis=-1)
+            for i, datapoint_preds in enumerate(hard_model_predictions.T):  # Transpose to (Datapoint, Model)
+                # Get the unique classes voted for and their counts
+                unique, counts = torch.unique(datapoint_preds, return_counts=True)
+                
+                # Move `unique` and `counts` to the same device
+                unique = unique.to(self.device_to_be)
+                counts = counts.to(self.device_to_be)
+    
                 # Unanimous decision
                 if len(unique) == 1:
-                    # Make decision
                     if onehot:
-                        ensemble_predictions.extend(np.eye(self.num_classes)[unique[0]])
+                        ensemble_predictions.append(torch.eye(self.num_classes, device=self.device_to_be)[unique[0]])
                     else:
-                        ensemble_predictions.extend(unique[0])
-                    # Dont Collect data
-
-                # Majority Vote
-                if np.max(counts) >= (len(self.models) / 2):
-                    # Make decision
-                    majority_vote = unique[np.argmax(counts)]
+                        ensemble_predictions.append(unique[0])
+    
+                # Majority vote decision
+                elif torch.max(counts) >= (len(self.models) / 2):
+                    majority_vote = unique[torch.argmax(counts)]
+                    
                     if onehot:
-                        ensemble_predictions.extend(np.eye(self.num_classes)[majority_vote])
+                        ensemble_predictions.append(torch.eye(self.num_classes, device=self.device_to_be)[majority_vote])
                     else:
-                        ensemble_predictions.extend(majority_vote)
-                    minority_ids = [i for i, pred in enumerate(datapoint_preds) if pred != majority_vote]
-                    # Collect data
+                        ensemble_predictions.append(majority_vote)
+    
+                    # Identify minority vote model indices
+                    minority_ids = [j for j, pred in enumerate(datapoint_preds) if pred != majority_vote]
+    
+                    # Collect data if needed
                     if collect:
                         for model_id in minority_ids:
-                            data_collection.append({'isic_id': isic_id,
-                                                    'target': target,
-                                                    'prediction': np.argmax(ensemble_predictions[-1]),
-                                                    'model_idx': model_id,
-                                                    },
-                                                   ignore_index=True)
-            collection_path = os.path.join(os.path.abspath('fine-tune-data'), collection_path)
-            data_collection.to_csv(collection_path, index=False, mode='a')
-
-        return ensemble_predictions
+                            data_collection = data_collection.append({
+                                'isic_id': isic_id,
+                                'target': target.item() if target is not None else None,
+                                'prediction': torch.argmax(ensemble_predictions[-1]).item() if onehot else ensemble_predictions[-1].item(),
+                                'model_idx': model_id,
+                            }, ignore_index=True)
+    
+            # Save the collected data to CSV if `collect` is enabled
+            if collect:
+                collection_path = os.path.join(os.path.abspath('fine-tune-data'), collection_path)
+                data_collection.to_csv(collection_path, index=False, mode='a')
+    
+        return torch.stack(ensemble_predictions).to(self.device_to_be)  # Ensure the final tensor is on the right device
 
     def fit(self, ds, epochs:int):
         """
-        Fit the models of the ensemble to a dataset or to the continuous training data collected by the ensemble
-        :param dataset:
-        :return:
+        UNFINISHED
         """
         # For every model filter out relevant datapoints and fit it to them
         for i, model in enumerate(self.models):
@@ -235,17 +256,48 @@ class Ensemble(LightningModule):
 
     def get_model_predictions(self, data):
         """Return a list of the predictions of the individual models"""
-        return np.asarray([model.predict(data).numpy() for model in self.models])
+        data = data.to(self.device_to_be)
+        return torch.stack([model.predict(data) for model in self.models])
 
     def test_ensemble(self, ds):
         """
         Test the performance of the ensemble on a test dataset
         """
+        print('Testing Ensemble...')
+        total_correct = 0.0
+        total_samples = 0.0
+        
+        for i, (img, target, isic_id) in enumerate(tqdm(ds)):
+            preds = self(img, onehot=False)  # Ensemble predictions (non-one-hot)
+            
+            # Ensure target is on the same device as the predictions
+            target = target.to(self.device_to_be)
+            target_classes = torch.argmax(target, dim=1)
+            
+            # Calculate the number of correct predictions
+            correct_results_sum = (preds == target_classes).sum().float()
+            
+            # Accumulate correct predictions and total number of samples
+            total_correct += correct_results_sum
+            total_samples += target.shape[0]
+        
+        # Final accuracy calculation (total correct / total samples)
+        accuracy = total_correct / total_samples
+    
+        return accuracy
+    
+    def test_ensemble_old(self, ds):
+        """
+        Test the performance of the ensemble on a test dataset
+        """
+        print('Testing Ensemble...')
         acc_total = 0
-        for i, img, target, isic_id in enumerate(ds):
+        for i, (img, target, isic_id) in enumerate(tqdm(ds)):
+            #print(f'Batch {i}...')
             preds = self(img, onehot=False)
             # Collect accuracy
-            target_classes = np.argmax(target, dim=1)
+            target = target.to(self.device_to_be)
+            target_classes = torch.argmax(target, dim=1)
             correct_results_sum = (preds == target_classes).sum().float()
             acc = correct_results_sum / target.shape[0]
             acc_total = (acc_total + acc) / (i + 1)
@@ -253,18 +305,43 @@ class Ensemble(LightningModule):
         return acc_total
 
     def test_models(self, ds):
+        accs_total = [0.0] * len(self.models)
+        total_samples = 0
+        
+        print('Testing Models...')
+        for i, (img, target, isic_id) in enumerate(tqdm(ds)):
+            probabilities = self.get_model_predictions(img)
+            target = target.to(self.device_to_be)
+            target_classes = torch.argmax(target, dim=1)
+            total_samples += target.shape[0]
+            
+            # Collect accuracy for each model
+            for j, model_probs in enumerate(probabilities):
+                predicted_classes = torch.argmax(model_probs, dim=1)
+                correct_results_sum = (predicted_classes == target_classes).sum().float()
+                accs_total[j] += correct_results_sum
+        
+        # Calculate average accuracy after looping over the dataset
+        average_accs = [correct_count / total_samples for correct_count in accs_total]
+
+        return average_accs
+
+    def test_models_old(self, ds):
         """
         Test the performance of each model on a test dataset
         """
+        print('Testing Models...')
         accs_total = [0.0] * len(self.models)
-        for i, img, target, isic_id in enumerate(ds):
+        for i, (img, target, isic_id) in enumerate(tqdm(ds)):
+            #print(f'Batch {i}...')
             probabilities = self.get_model_predictions(img)
-            target_classes = np.argmax(target, dim=1)
+            target = target.to(self.device_to_be)
+            target_classes = torch.argmax(target, dim=1)
             # Collect accuracy
             for j, model_probs in enumerate(probabilities):
-                predicted_classes = np.argmax(model_probs, dim=1)
+                predicted_classes = torch.argmax(model_probs, dim=1)
                 correct_results_sum = (predicted_classes == target_classes).sum().float()
-                acc = correct_results_sum / targets.shape[0]
+                acc = correct_results_sum / target.shape[0]
                 accs_total[j] = (accs_total[j] + acc) / (i + 1)
 
         return accs_total
@@ -273,5 +350,5 @@ class Ensemble(LightningModule):
         """
         Make predictions on a dataset and collect continuous training data
         """
-        for img, target, isic_id in dataset:
+        for img, target, isic_id in tqdm(dataset):
             self(img, target, isic_id, collection_path=collection_path, voting=voting)

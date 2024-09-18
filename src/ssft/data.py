@@ -155,7 +155,7 @@ class DataHandler:
                  num_workers = 1,
                  height: int = 450,
                  width: int = 600,
-                 device: str = 'auto',
+                 device: str = None,
                  dtype: torch.dtype = torch.float32,
                  model_name: str = 'dense201',
                  attribution: str = None):
@@ -170,9 +170,6 @@ class DataHandler:
             self.device = torch.device('cuda' if torch.cuda.is_available() else
                                        'mps' if torch.backends.mps.is_available() else
                                        'cpu')
-        else:
-            assert (device in ['cuda', 'mps', 'cpu']), "Device needs to be cuda, mps, or cpu"
-            self.device = torch.device(device)
 
         # Set Augmentations
         self.transform = transforms.Compose([
