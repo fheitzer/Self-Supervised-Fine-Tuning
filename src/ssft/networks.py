@@ -2,6 +2,7 @@ import pandas as pd
 import torch
 import timm
 from pytorch_lightning import LightningModule, Trainer, seed_everything
+from pytorch_lightning.loggers import TensorBoardLogger
 import numpy as np
 from torch import nn, optim
 import os
@@ -136,9 +137,12 @@ class Ensemble(LightningModule):
     """
 
     def __init__(self,
-                 models = None):
+                 models = None,
+                 width: int=384,
+                 height: int=384):
         super(Ensemble, self).__init__()
         self.models = list()
+        self.model_names = list()
         if models and all(isinstance(model, LightningModule) for model in models):
             self.models = models
         elif models and all(isinstance(model, str) for model in models):
@@ -156,10 +160,13 @@ class Ensemble(LightningModule):
         self.missed_data = None
         self.num_classes = self.models[0].num_classes
         self.acc = None
+        self.width = width
+        self.height = height
 
     def load_models(self, models):
         for model_path in models:
             model_name = model_path.split('/')[0]
+            self.model_names.append(model_name)
             model_path = os.path.abspath(os.path.join('models', model_path))
             model = LitResnet.load_from_checkpoint(model_path)
             self.models.append(model)
@@ -172,10 +179,9 @@ class Ensemble(LightningModule):
              img,
              target=None,
              isic_id=None,
-             collection_path: str = None,
+             collection_name: str = None,
              voting: str = 'hard',
              onehot: bool = True,
-             collect: bool = False  # Adding collect as an argument
              ):
         """
         Make prediction using a majority voting
@@ -229,18 +235,18 @@ class Ensemble(LightningModule):
                     minority_ids = [j for j, pred in enumerate(datapoint_preds) if pred != majority_vote]
     
                     # Collect data if needed
-                    if collect:
+                    if collection_name:
                         for model_id in minority_ids:
                             data_collection = data_collection.append({
                                 'isic_id': isic_id,
                                 'target': target.item() if target is not None else None,
                                 'prediction': torch.argmax(ensemble_predictions[-1]).item() if onehot else ensemble_predictions[-1].item(),
-                                'model_idx': model_id,
+                                'model_id': model_id,
                             }, ignore_index=True)
     
             # Save the collected data to CSV if `collect` is enabled
-            if collect:
-                collection_path = os.path.join(os.path.abspath('fine-tune-data'), collection_path)
+            if collection_name:
+                collection_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', 'fine-tune-data', collection_name)
                 data_collection.to_csv(collection_path, index=False, mode='a')
     
         return torch.stack(ensemble_predictions).to(self.device_to_be)  # Ensure the final tensor is on the right device
@@ -285,24 +291,6 @@ class Ensemble(LightningModule):
         accuracy = total_correct / total_samples
     
         return accuracy
-    
-    def test_ensemble_old(self, ds):
-        """
-        Test the performance of the ensemble on a test dataset
-        """
-        print('Testing Ensemble...')
-        acc_total = 0
-        for i, (img, target, isic_id) in enumerate(tqdm(ds)):
-            #print(f'Batch {i}...')
-            preds = self(img, onehot=False)
-            # Collect accuracy
-            target = target.to(self.device_to_be)
-            target_classes = torch.argmax(target, dim=1)
-            correct_results_sum = (preds == target_classes).sum().float()
-            acc = correct_results_sum / target.shape[0]
-            acc_total = (acc_total + acc) / (i + 1)
-
-        return acc_total
 
     def test_models(self, ds):
         accs_total = [0.0] * len(self.models)
@@ -326,29 +314,41 @@ class Ensemble(LightningModule):
 
         return average_accs
 
-    def test_models_old(self, ds):
-        """
-        Test the performance of each model on a test dataset
-        """
-        print('Testing Models...')
-        accs_total = [0.0] * len(self.models)
-        for i, (img, target, isic_id) in enumerate(tqdm(ds)):
-            #print(f'Batch {i}...')
-            probabilities = self.get_model_predictions(img)
-            target = target.to(self.device_to_be)
-            target_classes = torch.argmax(target, dim=1)
-            # Collect accuracy
-            for j, model_probs in enumerate(probabilities):
-                predicted_classes = torch.argmax(model_probs, dim=1)
-                correct_results_sum = (predicted_classes == target_classes).sum().float()
-                acc = correct_results_sum / target.shape[0]
-                accs_total[j] = (accs_total[j] + acc) / (i + 1)
-
-        return accs_total
-
-    def classify_and_collect(self, dataset, collection_path, voting='hard'):
+    def classify_and_collect(self, dataset, collection_name, voting='hard'):
         """
         Make predictions on a dataset and collect continuous training data
         """
         for img, target, isic_id in tqdm(dataset):
-            self(img, target, isic_id, collection_path=collection_path, voting=voting)
+            _ = self(img, target, isic_id, collection_name=collection_name, voting=voting)
+        meta = pd.read_csv(os.path.join('fine-tune-data', collection_name))
+        
+    def fine_tune_models(self, collection_name, data_dir='ISIC2024/train-image/image/'):
+        batch_size = 16
+        collection_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', 'fine-tune-data')
+        meta_path = os.path.join('fine-tune-data', collection_name)
+        for model_id, model in enumerate(self.models):
+            dh_train = data.DataHandler(data_dir=data_dir,
+                                        meta_path=meta_path,
+                                        width=self.width,
+                                        height=self.height,
+                                        batch_size=batch_size,
+                                        num_workers=0,
+                                        model_name=self.model_names[model_id],
+                                        model_id=model_id
+                                       )
+            logger = TensorBoardLogger(collection_path, collection_name + "_logs")
+            
+            batches_per_epoch = int(len(dh_train.dataset) / batch_size)
+            
+            trainer = Trainer(devices=1,
+                      accelerator=self.device_to_be,
+                      max_epochs=4,
+                      logger=logger,
+                      log_every_n_steps=batches_per_epoch,
+                      )
+            # Train
+            trainer.fit(model,
+                        dh_train.dataloader)
+
+            trainer.save_checkpoint(os.path.join('models', 'fine-tuned', self.model_names[model_id], collection_name))
+

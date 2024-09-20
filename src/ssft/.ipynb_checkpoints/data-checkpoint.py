@@ -48,11 +48,14 @@ class CustomMetaDataset(Dataset):
                  img_dir,
                  transform: transforms.Compose,
                  target_transform: transforms.Compose,
-                 attribution: str=None):
+                 attribution: str=None,
+                 model_id: int=None):
         super().__init__()
         self.df = pd.read_csv(meta_path, low_memory=False)
         if attribution:
             self.df = self.df[self.df['attribution'] == attribution]
+        if model_id:
+            self.df = self.df[self.df['model_id'] == model_id]
         self.targets = self.df['target'].values
         self.image_ids = self.df['isic_id'].values
             
@@ -88,11 +91,14 @@ class CustomMetaDatasetBalanced(Dataset):
                  target_transform: transforms.Compose,
                  attribution: str=None,
                  split: float=0.85,
-                 train: bool=True):
+                 train: bool=True,
+                 model_id: int=None):
         super().__init__()
         df = pd.read_csv(meta_path, low_memory=False)
         if attribution:
             df = df[df['attribution'] == attribution]
+        if model_id:
+            df = df[df['model_id'] == model_id]
             
         self.df_positive = df[df["target"] == 1].reset_index()
         self.df_negative = df[df["target"] == 0].reset_index()
@@ -158,7 +164,8 @@ class DataHandler:
                  device: str = None,
                  dtype: torch.dtype = torch.float32,
                  model_name: str = 'dense201',
-                 attribution: str = None):
+                 attribution: str = None,
+                 model_id: int = None):
         # Set Params
         self.data_dir = data_dir
         self.meta_path = meta_path
@@ -205,7 +212,8 @@ class DataHandler:
                                                      train=train,
                                                      transform=self.transform if train else self.transform_val,
                                                      target_transform=self.target_transform,
-                                                     attribution=attribution)
+                                                     attribution=attribution,
+                                                     model_id=model_id)
         # ImageFolders Version
         else:
             self.dataset = CustomImgFolderDataset(root=self.data_dir,

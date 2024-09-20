@@ -148,20 +148,22 @@ def ssft(out_path: str = 'fine-tuning-data',
         #'mobilenetv2_140/ISIC2024/train-image/image/Department of Dermatology, Hospital Clínic de Barcelona/20240917-204319/epoch=219-val_loss=0.00-val_accuracy=1.0000.ckpt',
     ]
 
-    ensemble = Ensemble(models=models)
     
     new_clinics = ["Department of Dermatology, Hospital Clínic de Barcelona",
-                   'Memorial Sloan Kettering Cancer Center'
+                   'Memorial Sloan Kettering Cancer Center',
                    'University Hospital of Basel',
                    'Frazer Institute, The University of Queensland, Dermatology Research Centre',
                    'ACEMID MIA',
                    'ViDIR Group, Department of Dermatology, Medical University of Vienna',
                    'Department of Dermatology, University of Athens, Andreas Syggros Hospital of Skin and Venereal Diseases, Alexander Stratigos, Konstantinos Liopyris',
                   ]
-
+    ensemble_start_accs = list()
+    models_start_accs = list()
     # Testing starting accuracy
     for clinic in new_clinics:
-    
+        
+        ensemble = Ensemble(models=models)
+        
         dh = data.DataHandler(data_dir=dataset_name,
                               meta_path=meta_path,
                               batch_size=batch_size,
@@ -175,17 +177,24 @@ def ssft(out_path: str = 'fine-tuning-data',
                              )
         print(f'New Clinic: {clinic}')
         ensemble_start_acc = ensemble.test_ensemble(dh.dataloader)
+        ensemble_start_accs.append(ensemble_start_acc)
         print(ensemble_start_acc)
         models_start_acc = ensemble.test_models(dh.dataloader)
+        models_start_accs.append(models_start_acc)
         print(models_start_acc)
     
         save_path = os.path.join(os.path.abspath(out_path), model_name, dataset_name, clinic)
     
-    exit()
-    # Take this to the loop
-    # Get Self Supervised Labels
-    ensemble.classify_and_collect(dh, save_path)
-    # Perform one round of fine tuning
+        print("All clinics done")
+        print(ensemble_start_accs)
+        print(models_start_accs)
+        exit()
+        collection_name = clinic + t
+        # Take this to the loop
+        # Get Self Supervised Labels
+        ensemble.classify_and_collect(dh, collection_name)
+        # Perform one round of fine tuning
+        ensemble.fine_tune_models(collection_name)
 
     # Test the ensemble and models again
 
