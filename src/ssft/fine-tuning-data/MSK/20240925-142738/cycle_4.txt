@@ -1,0 +1,4 @@
+densenet121: 0.5
+densenet161: 0.7318840622901917
+densenet201: 0.26811593770980835
+ensemble: 0.5

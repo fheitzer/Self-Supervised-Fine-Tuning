@@ -7,6 +7,19 @@ from torchvision import transforms
 from PIL import Image
 import numpy as np
 import gc
+import os
+
+
+def save_dict(details, name='name'):
+    # Extract directory from the given file path
+    directory = os.path.dirname(name)
+    
+    # Create the directory if it doesn't exist
+    os.makedirs(directory, exist_ok=True)
+    
+    with open(f"{name}.txt", 'w') as f:  
+        for key, value in details.items():  
+            f.write('%s: %s\n' % (key, value))
 
 def set_seed(seed=42):
     '''Sets the seed of the entire notebook so results are the same every time we run.
@@ -91,14 +104,25 @@ def estimate_target_transform_complexity(target_transforms):
     return complexity_factor
 
 
-# Create model and get the number of parameters
-def get_model_param_size(model_name):
-    model = create_model(model_name, pretrained=True)
-    model_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    model_size = model_params * 4  # 4 bytes per parameter (assuming float32)
-    del model
-    gc.collect()
-    return model_size
+def get_model_param_sizes(model_names):
+    total_model_size = 0
+    
+    # Check if input is a single string, if so, convert to list
+    if isinstance(model_names, str):
+        model_names = [model_names]
+    
+    for model_name in model_names:
+        model = create_model(model_name, pretrained=True)
+        model_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        model_size = model_params * 4  # 4 bytes per parameter (assuming float32)
+        
+        total_model_size += model_size  # Accumulate the model sizes
+        
+        # Clean up
+        del model
+        gc.collect()
+    
+    return total_model_size
     
 
 # Function to calculate the memory usage per image (data and target transforms)
@@ -116,7 +140,7 @@ def recommend_max_batch_size(image_folder, num_workers, model_name, data_transfo
     available_ram = get_available_ram()
     
     # Get model parameter size
-    model_param_size = get_model_param_size(model_name)
+    model_param_size = get_model_param_sizes(model_name)
     
     # Calculate average image size in the dataset folder and its subdirectories
     avg_image_size = calculate_average_image_size(image_folder)
@@ -142,10 +166,12 @@ def recommend_max_batch_size(image_folder, num_workers, model_name, data_transfo
     # Calculate the maximum number of images (batch size) that fits in the available memory
     max_batch_size = ram_available_for_data // memory_per_worker
     
-    # Floor the batch size to the nearest multiple of 8
-    floored_batch_size = (max_batch_size // 8) * 8
-    
-    return max(8, floored_batch_size)  # Ensure at least 8
+    # Floor the batch size to the nearest power of 2
+    floored_batch_size = 2 ** int(np.floor(np.log2(max_batch_size)))
+
+    batch_size = max(8, floored_batch_size)
+    batch_size = min(512, batch_size)
+    return batch_size
 
 
 # Main function to recommend the optimal number of workers

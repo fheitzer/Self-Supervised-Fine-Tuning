@@ -2,14 +2,13 @@ import torch
 import PIL.Image
 import os
 import numpy as np
-from skimage import io
-from skimage.transform import resize
 import random
 from torchvision import transforms, datasets
 from torchvision.datasets.folder import default_loader
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 
+pd.set_option("future.no_silent_downcasting", True)
 
 # Stratified Kfold to split the data balanced by class and patient for train and val
 
@@ -23,6 +22,25 @@ def slice_by_percentage(x, percentage, train=True):
         return x[:split]
     else:
         return x[split:]
+
+def preprocess_meta(df, meta_name, img_dir):
+    # prepare metdata
+    df = df[df['dx'].isin(['melanoma', 'nevus'])]
+    if 'DERM7PT' not in meta_name:
+        if 'PH2' in meta_name:
+            df = df[df['dx_type'] == 'expert dermatologist']
+        else:
+            df = df[df['dx_type'] == 'histopathology']
+    df = df[['image_id', 'dx']]
+    df = df.rename(columns={'image_id':'isic_id', 'dx':'target'})
+    df = df.replace({'melanoma':1, 'nevus':0})
+    df_filenames = df['isic_id'].tolist()
+    directory_filenames = os.listdir(img_dir)
+    directory_filenames = [x[:-4] for x in directory_filenames]
+    directory_filenames_set = set(directory_filenames)
+    missing_files = [filename for filename in df_filenames if filename not in directory_filenames_set]
+    df = df[~df['isic_id'].isin(missing_files)]
+    return df
 
 
 class CustomImgFolderDataset(datasets.ImageFolder):
@@ -40,38 +58,59 @@ class CustomImgFolderDataset(datasets.ImageFolder):
 
         return sample, target, path
 
+
 class CustomMetaDataset(Dataset):
     """This dataset samples an unbalanced binary classification dataset in a 50/50 fashion"""
 
     def __init__(self,
-                 meta_path,
+                 meta_name,
                  img_dir,
                  transform: transforms.Compose,
                  target_transform: transforms.Compose,
-                 attribution: str=None,
-                 model_id: int=None):
+                 attribution: str=None, # deprecated
+                 split: float=0.85,
+                 train: bool=True,
+                 model_id: int=None,
+                 filetype: str='.png',
+                 process_meta: bool=True
+                ):
         super().__init__()
-        self.df = pd.read_csv(meta_path, low_memory=False)
-        if attribution:
-            self.df = self.df[self.df['attribution'] == attribution]
+        df = pd.read_csv(meta_name + '.csv', low_memory=False)
+        self.empty = False
         if model_id:
-            self.df = self.df[self.df['model_id'] == model_id]
-        self.targets = self.df['target'].values
-        self.image_ids = self.df['isic_id'].values
+            df = df[df['model_id'] == model_id]
+        if process_meta:
+            df = preprocess_meta(df, meta_name, img_dir)
+        print(f'Dataset length: {df.shape[0]}')
+
+        if df.shape[0] < 1:
+            self.empty = True
             
+        df = df.reset_index()
+        df = df.sample(frac=1).reset_index(drop=True)
+        self.file_names = df['isic_id'].values
+        self.targets = df['target'].values
+
+        if split:
+            self.file_names = slice_by_percentage(self.file_names, split, train)
+            self.targets = slice_by_percentage(self.targets, split, train)
+
+        self.filetype = filetype
         self.transform = transform
         self.target_transform = target_transform
         self.img_dir = img_dir
-        self.n_samples = len(self.df)
+        self.train = train
+        del df
+        gc.collect()
 
     def __len__(self):
-        return self.n_samples
+        return len(self.file_names)
 
     def __getitem__(self, idx):
         # Get Image and target
-        img_id = self.image_ids[idx]
-        img = default_loader(os.path.join(self.img_dir, img_id + '.jpg'))
-        target = targets[idx]
+        img_id = self.file_names[idx]
+        img = default_loader(os.path.join(self.img_dir, img_id + self.filetype))
+        target = self.targets[idx]
         # Transform if configured
         if self.transform:
             img = self.transform(img)
@@ -79,44 +118,60 @@ class CustomMetaDataset(Dataset):
             target = self.target_transform(target)
             
         return img, target, img_id
-        
 
 class CustomMetaDatasetBalanced(Dataset):
     """This dataset samples an unbalanced binary classification dataset in a 50/50 fashion"""
 
     def __init__(self,
-                 meta_path,
+                 meta_name,
                  img_dir,
                  transform: transforms.Compose,
                  target_transform: transforms.Compose,
-                 attribution: str=None,
+                 attribution: str=None, # deprecated
                  split: float=0.85,
                  train: bool=True,
-                 model_id: int=None):
+                 model_id: int=None,
+                 filetype: str='.png',
+                 process_meta: bool=True
+                ):
         super().__init__()
-        df = pd.read_csv(meta_path, low_memory=False)
-        if attribution:
-            df = df[df['attribution'] == attribution]
+        df = pd.read_csv(meta_name + '.csv', low_memory=False)
+        self.empty = False
         if model_id:
             df = df[df['model_id'] == model_id]
-            
+        if process_meta:
+            df = preprocess_meta(df, meta_name, img_dir)
+        print(f'Dataset length: {df.shape[0]}')
+
+        if df.shape[0] < 1:
+            self.empty = True
+        df = df.sample(frac=1).reset_index(drop=True)
+
         self.df_positive = df[df["target"] == 1].reset_index()
         self.df_negative = df[df["target"] == 0].reset_index()
         self.file_names_positive = self.df_positive['isic_id'].values
         self.file_names_negative = self.df_negative['isic_id'].values
         self.targets_positive = self.df_positive['target'].values
         self.targets_negative = self.df_negative['target'].values
-        
-        self.file_names_positive = slice_by_percentage(self.file_names_positive, split, train)
-        self.file_names_negative = slice_by_percentage(self.file_names_negative, split, train)
-        self.targets_positive = slice_by_percentage(self.targets_positive, split, train)
-        self.targets_negative = slice_by_percentage(self.targets_negative, split, train)
-            
+
+        if split:
+            self.file_names_positive = slice_by_percentage(self.file_names_positive, split, train)
+            self.file_names_negative = slice_by_percentage(self.file_names_negative, split, train)
+            self.targets_positive = slice_by_percentage(self.targets_positive, split, train)
+            self.targets_negative = slice_by_percentage(self.targets_negative, split, train)
+        if not self.empty:
+            self.n_samples = (len(self.targets_positive) + len(self.targets_negative))
+            print(f'Positive Targets: {len(self.targets_positive)}')
+            print(f'Negative Targets: {len(self.targets_negative)}')
+            print(f'Positive Target Percentage: {len(self.targets_positive) / self.n_samples}')
+        self.filetype = filetype
         self.transform = transform
         self.target_transform = target_transform
         self.img_dir = img_dir
         self.train = train
-        self.n_samples = (len(self.targets_positive) + len(self.targets_negative))
+        
+        del df
+        gc.collect()
 
     def __len__(self):
         return len(self.file_names_positive) * 2 if self.train else self.n_samples
@@ -139,7 +194,7 @@ class CustomMetaDatasetBalanced(Dataset):
         idx = idx % len(df.shape)
         # Get Image and target
         img_id = file_names[idx]
-        img = default_loader(os.path.join(self.img_dir, img_id + '.jpg'))
+        img = default_loader(os.path.join(self.img_dir, img_id + self.filetype))
         target = targets[idx]
         # Transform if configured
         if self.transform:
@@ -154,7 +209,7 @@ class DataHandler:
 
     def __init__(self,
                  data_dir: str = None,
-                 meta_path: str = None,
+                 meta_name: str = None,
                  train: bool=True,
                  batch_size = 'auto',
                  shuffle: bool = True,
@@ -165,10 +220,13 @@ class DataHandler:
                  dtype: torch.dtype = torch.float32,
                  model_name: str = 'dense201',
                  attribution: str = None,
-                 model_id: int = None):
+                 model_id: int = None,
+                 process_meta: bool=True,
+                 split: float=0.85,
+                 balanced: bool=True):
         # Set Params
         self.data_dir = data_dir
-        self.meta_path = meta_path
+        self.meta_name = meta_name
         self.height = height
         self.width = width
         
@@ -205,15 +263,29 @@ class DataHandler:
         
         self.data_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', data_dir)
         # Metadata Version
-        if self.meta_path:
-            self.meta_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', self.meta_path)
-            self.dataset = CustomMetaDatasetBalanced(img_dir=self.data_dir,
-                                                     meta_path=self.meta_path,
-                                                     train=train,
-                                                     transform=self.transform if train else self.transform_val,
-                                                     target_transform=self.target_transform,
-                                                     attribution=attribution,
-                                                     model_id=model_id)
+        if self.meta_name:
+            self.meta_name = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', 'metadata', self.meta_name)
+            if balanced:
+                self.dataset = CustomMetaDatasetBalanced(img_dir=self.data_dir,
+                                                         meta_name=self.meta_name,
+                                                         train=train,
+                                                         transform=self.transform if train else self.transform_val,
+                                                         target_transform=self.target_transform,
+                                                         attribution=attribution,
+                                                         model_id=model_id,
+                                                         process_meta=process_meta,
+                                                         split=split)
+            else:
+                self.dataset = CustomMetaDataset(img_dir=self.data_dir,
+                                                         meta_name=self.meta_name,
+                                                         train=train,
+                                                         transform=self.transform if train else self.transform_val,
+                                                         target_transform=self.target_transform,
+                                                         attribution=attribution,
+                                                         model_id=model_id,
+                                                         process_meta=process_meta,
+                                                         split=split)
+                
         # ImageFolders Version
         else:
             self.dataset = CustomImgFolderDataset(root=self.data_dir,

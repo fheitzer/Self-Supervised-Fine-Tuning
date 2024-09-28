@@ -6,10 +6,14 @@ from pytorch_lightning.loggers import TensorBoardLogger
 import numpy as np
 from torch import nn, optim
 import os
+import gc
 from tqdm import tqdm
 
-from PIL import Image
+from torchmetrics.classification import BinaryConfusionMatrix
 
+from PIL import Image
+import data
+from utils import save_dict
 
 
 class GeMPooling(nn.Module):
@@ -70,6 +74,7 @@ class LitResnet(LightningModule):
         # Where used?
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
+        self.confusion_matrix = BinaryConfusionMatrix()
 
     def forward(self, x):
         logits = self.model(x)
@@ -87,40 +92,42 @@ class LitResnet(LightningModule):
         samples, targets, _ = batch
         outputs = self.forward(samples)
         loss = self.criterion(outputs, targets)
-        accuracy = self.binary_accuracy(outputs, targets)
         batch_size = targets.size(dim=0)
-        self.log('train_accuracy', accuracy, prog_bar=True, batch_size=batch_size)
-        self.log('train_loss', loss, prog_bar=True, batch_size=batch_size)
+        accuracy, balanced_accuracy, sensitivity, specificity = self.compute_metrics(targets, outputs)
+        self.log('train_accuracy', accuracy, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=True)
+        self.log('train_loss', loss, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=True)
+        self.log('train_balanced_accuracy', balanced_accuracy, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=False)
+        self.log('train_sensitivity', sensitivity, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=False)
+        self.log('train_specificity', specificity, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=False)
         return loss
     
     def validation_step(self, batch, batch_idx):
         inputs, targets, _ = batch
         outputs = self.forward(inputs)
-        accuracy = self.binary_accuracy(outputs, targets)
         loss = self.criterion(outputs, targets)
         batch_size = targets.size(dim=0)
-        self.log('val_accuracy', accuracy, batch_size=batch_size)
-        self.log('val_loss', loss, batch_size=batch_size)
+        accuracy, balanced_accuracy, sensitivity, specificity = self.compute_metrics(targets, outputs)
+        self.log('val_accuracy', accuracy, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=False)
+        self.log('val_loss', loss, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=False)
+        self.log('val_balanced_accuracy', balanced_accuracy, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=False)
+        self.log('val_sensitivity', sensitivity, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=False)
+        self.log('val_specificity', specificity, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=False)
 
     def test_step(self, batch, batch_idx):
         inputs, targets, _ = batch
         outputs = self.forward(inputs)
-        accuracy = self.binary_accuracy(outputs, targets)
         loss = self.criterion(outputs, targets)
         batch_size = targets.size(dim=0)
-        self.log('test_accuracy', accuracy, batch_size=batch_size)
-        self.log('test_loss', loss, batch_size=batch_size)
+        accuracy, balanced_accuracy, sensitivity, specificity = self.compute_metrics(targets, outputs)
+        self.log('test_accuracy', accuracy, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=True)
+        self.log('test_loss', loss, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=True)
+        self.log('test_balanced_accuracy', balanced_accuracy, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=False)
+        self.log('test_sensitivity', sensitivity, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=False)
+        self.log('test_specificity', specificity, batch_size=batch_size, on_step=True, on_epoch=True, prog_bar=False)
     
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
-        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer,
-                                                         T_max=500, 
-                                                         eta_min=1e-6)
-        return {'optimizer': optimizer,
-                'lr_scheduler': {'scheduler': scheduler,
-                                 'interval': 'step',
-                                 'frequency': 1}
-               }
+        optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        return optimizer
 
     def binary_accuracy(self, outputs, targets):
         probabilities = self.out_activation(outputs, dim=1)
@@ -130,6 +137,33 @@ class LitResnet(LightningModule):
         acc = correct_results_sum/targets.shape[0]
         return acc
 
+    def compute_metrics(self, targets, outputs):
+        # Get class predictions and binary target
+        probabilities = self.out_activation(outputs, dim=1)
+        predicted_classes = torch.argmax(probabilities, dim=1)
+        target_classes = torch.argmax(targets, dim=1)
+        # Get confusion matrix
+        conf_matrix = self.confusion_matrix(predicted_classes, target_classes)
+        tn, fp, fn, tp = conf_matrix.flatten()
+        # Convert these values to floats to prevent division issues
+        tn, fp, fn, tp = tn.float(), fp.float(), fn.float(), tp.float()
+        # Calculate specificity, sensitivity, balanced accuracy, and accuracy as tensors
+        specificity = tn / (tn + fp)
+        sensitivity = tp / (tp + fn)
+        balanced_accuracy = (sensitivity + specificity) / 2
+        accuracy = (tp + tn) / (tp + fn + fp + tn)
+        return accuracy, balanced_accuracy, sensitivity, specificity
+
+    def freeze_feature_extractor(self):
+        # Optionally freeze the feature extractor (backbone)
+        for param in self.model.parameters():
+            param.requires_grad = False
+
+        # Unfreeze only the classifier layer (or specific layers)
+        for param in self.model.get_classifier().parameters():
+            param.requires_grad = True
+        
+
 
 class Ensemble(LightningModule):
     """
@@ -138,14 +172,15 @@ class Ensemble(LightningModule):
 
     def __init__(self,
                  models = None,
-                 width: int=384,
-                 height: int=384):
+                 width: int=600,
+                 height: int=450):
         super(Ensemble, self).__init__()
         self.models = list()
         self.model_names = list()
         if models and all(isinstance(model, LightningModule) for model in models):
             self.models = models
         elif models and all(isinstance(model, str) for model in models):
+            self.model_paths = models
             self.load_models(models)
         else:
             raise Exception("Models must be specified as lightning.LightningModule list or str list giving checkpoint paths")
@@ -154,14 +189,13 @@ class Ensemble(LightningModule):
                                          'cpu')
         self.send_models_to_device()
 
-        
-        
         self.fine_tuning_data = None
         self.missed_data = None
         self.num_classes = self.models[0].num_classes
         self.acc = None
         self.width = width
         self.height = height
+        self.low_precision = False
 
     def load_models(self, models):
         for model_path in models:
@@ -171,9 +205,46 @@ class Ensemble(LightningModule):
             model = LitResnet.load_from_checkpoint(model_path)
             self.models.append(model)
 
+    def unload_models(self):
+        del self.models
+        torch.cuda.empty_cache()
+        gc.collect()
+        self.models = list()
+        
+    def switch_models_to_cpu(self, keep_model_idx):
+        for i, model in enumerate(self.models):
+            if i != keep_model_idx:
+                # Move model to CPU
+                self.models[i] = model.to('cpu')
+            else:
+                self.models[i] = model.to('cuda')
+
     def send_models_to_device(self):
+        for i, model in enumerate(self.models):
+            self.models[i] = model.to(self.device_to_be)
+
+    def convert_to_fp16(self):
+        """Convert all models in the list to FP16 (half precision)."""
+        for i, model in enumerate(self.models):
+            # Convert model to FP16 precision
+            self.models[i] = model.half()
+        self.low_precision = True
+
+    def convert_to_fp32(self):
+        """Convert all models in the list to FP16 (half precision)."""
+        for i, model in enumerate(self.models):
+            # Convert model to FP16 precision
+            self.models[i] = model.float()
+        self.low_precision = False
+    
+    def set_learning_rate(self, lr):
         for model in self.models:
-            model.to(self.device_to_be)
+            model.learning_rate = lr
+
+    def freeze_feature_extractors(self):
+        for model in self.models:
+            model.freeze_feature_extractor()
+
 
     def __call__(self,
              img,
@@ -191,13 +262,21 @@ class Ensemble(LightningModule):
         img = img.to(self.device_to_be)
         if target is not None:
             target = target.to(self.device_to_be)
+        if self.low_precision:
+            img = img.half()
+            if target is not None:
+                target = target.half()
         
-        data_collection = pd.DataFrame(columns=['isic_id', 'target', 'prediction', 'model_idx'])
+        data_ids = list()
+        data_targets = list()
+        data_preds = list()
+        data_modelids = list()
         
         # Get model predictions (this should return a tensor of model outputs)
         model_predictions = self.get_model_predictions(img)  # Expecting this to return a single tensor
         ensemble_predictions = []
-    
+
+        # TODO: Implement soft voting
         if voting == 'soft':
             # Average the model predictions (soft voting)
             ensemble_predictions = torch.mean(model_predictions, dim=0)
@@ -237,17 +316,21 @@ class Ensemble(LightningModule):
                     # Collect data if needed
                     if collection_name:
                         for model_id in minority_ids:
-                            data_collection = data_collection.append({
-                                'isic_id': isic_id,
-                                'target': target.item() if target is not None else None,
-                                'prediction': torch.argmax(ensemble_predictions[-1]).item() if onehot else ensemble_predictions[-1].item(),
-                                'model_id': model_id,
-                            }, ignore_index=True)
+                            data_ids.append(isic_id[i])
+                            data_targets.append(torch.argmax(target[i]).item() if target is not None else None)
+                            # TODO: Append not as binary, but the probability to 'scale' learning rate
+                            data_preds.append(torch.argmax(ensemble_predictions[-1]).item() if onehot else ensemble_predictions[-1].item())
+                            data_modelids.append(model_id)
     
             # Save the collected data to CSV if `collect` is enabled
             if collection_name:
-                collection_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', 'fine-tune-data', collection_name)
-                data_collection.to_csv(collection_path, index=False, mode='a')
+                collection_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', 'fine-tuning-data', collection_name)
+                
+                data_collection = pd.DataFrame.from_dict({'isic_id': data_ids,
+                                                          'target_true': data_targets, 
+                                                          'target': data_preds,
+                                                          'model_id': data_modelids})
+                data_collection.to_csv(collection_path + '.csv', index=False, mode='a', header=not os.path.exists(collection_path + '.csv'))
     
         return torch.stack(ensemble_predictions).to(self.device_to_be)  # Ensure the final tensor is on the right device
 
@@ -263,6 +346,8 @@ class Ensemble(LightningModule):
     def get_model_predictions(self, data):
         """Return a list of the predictions of the individual models"""
         data = data.to(self.device_to_be)
+        if self.low_precision:
+            data = data.half()
         return torch.stack([model.predict(data) for model in self.models])
 
     def test_ensemble(self, ds):
@@ -318,37 +403,57 @@ class Ensemble(LightningModule):
         """
         Make predictions on a dataset and collect continuous training data
         """
-        for img, target, isic_id in tqdm(dataset):
+        print('Collect Self Supervised labels...')
+        for img, target, isic_id in tqdm(dataset.dataloader):
             _ = self(img, target, isic_id, collection_name=collection_name, voting=voting)
-        meta = pd.read_csv(os.path.join('fine-tune-data', collection_name))
         
-    def fine_tune_models(self, collection_name, data_dir='ISIC2024/train-image/image/'):
-        batch_size = 16
-        collection_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', 'fine-tune-data')
-        meta_path = os.path.join('fine-tune-data', collection_name)
-        for model_id, model in enumerate(self.models):
+    def fine_tune_models(self, collection_name, data_dir='ISIC2024/train-image/image/', learning_rate=1e-5, only_classifier=False):
+        self.set_learning_rate(lr=learning_rate)
+        batch_size = 1
+        if self.low_precision is True:
+            self.convert_to_fp16()
+        if only_classifier:
+            self.freeze_feature_extractors()
+        collection_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', 'fine-tuning-data')
+        meta_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', 'fine-tuning-data', collection_name)
+        print('Fine tuning models...')
+        for model_id, model in enumerate(tqdm(self.models)):
+            self.switch_models_to_cpu(keep_model_idx=model_id)
             dh_train = data.DataHandler(data_dir=data_dir,
-                                        meta_path=meta_path,
+                                        meta_name=meta_path,
                                         width=self.width,
                                         height=self.height,
                                         batch_size=batch_size,
-                                        num_workers=0,
+                                        num_workers=8,
                                         model_name=self.model_names[model_id],
-                                        model_id=model_id
-                                       )
-            logger = TensorBoardLogger(collection_path, collection_name + "_logs")
+                                        model_id=model_id,
+                                        process_meta=False,
+                                        train=False,
+                                        split=None,
+                                        balanced=False)
+            if dh_train.dataset.empty:
+                print(f'No fine-tuning data collected for {self.model_names[model_id]}...')
+                continue
+            #logger = TensorBoardLogger(os.path.join('models', 'fine-tuned', self.model_names[model_id]), collection_name + "_logs")
             
             batches_per_epoch = int(len(dh_train.dataset) / batch_size)
             
             trainer = Trainer(devices=1,
-                      accelerator=self.device_to_be,
-                      max_epochs=4,
-                      logger=logger,
-                      log_every_n_steps=batches_per_epoch,
+                      accelerator='cuda',
+                      max_epochs=1,
+                      #logger=logger,
+                      #log_every_n_steps=batches_per_epoch,
+                      enable_checkpointing=False,
+                      logger=False,
+                      precision='16-mixed'
                       )
             # Train
             trainer.fit(model,
                         dh_train.dataloader)
-
-            trainer.save_checkpoint(os.path.join('models', 'fine-tuned', self.model_names[model_id], collection_name))
-
+            
+            # Uncomment to save model at every cycle
+            #trainer.save_checkpoint(os.path.join('models', 'fine-tuned', self.model_names[model_id], collection_name + '.ckpt'), weights_only=True)
+            del dh_train
+            gc.collect()
+        self.send_models_to_device()
+        
