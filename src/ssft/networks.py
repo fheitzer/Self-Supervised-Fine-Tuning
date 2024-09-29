@@ -44,28 +44,36 @@ class LitResnet(LightningModule):
                  local_ckeckpoint_path: str = None,
                  global_pool="catavgmax",
                  num_classes=2,
-                 class_weights=None):
+                 class_weights=None,
+                 pretrained: bool = False):
         super().__init__()
         self.save_hyperparameters()
         self.model_name = model
-
+        if class_weights is not None:
+            if not isinstance(class_weights, torch.Tensor):
+                class_weights = torch.as_tensor(class_weights)
+         # Set image input size
+        if 'eff' in model:
+            if 'b0' in model:
+                self.size = 224
+            elif 'b1' in model:
+                self.size = 240
+            elif 'b2' in model:
+                self.size = 260
+        else:
+            self.size = 224
+            
         if model == 'vit_base_patch16_224':
             global_pool = 'avg'
         
         if local_ckeckpoint_path and isinstance(local_ckeckpoint_path, str):
             local_ckeckpoint_path = {'file': local_ckeckpoint_path}
         self.model = timm.create_model(model,
-                                       pretrained=True if local_ckeckpoint_path else False,
+                                       pretrained=True if local_ckeckpoint_path else pretrained,
                                        pretrained_cfg_overlay=local_ckeckpoint_path,
                                        global_pool=global_pool,
                                        num_classes=num_classes,
                                       )
-        #in_features = self.model.classifier.in_features
-        #self.model.classifier = nn.Identity()
-        #self.model.global_pool = nn.Identity()
-        #self.pooling = GeMPooling()
-        #self.linear = nn.Linear(in_features, num_classes)
-        #self.softmax = nn.Softmax()
         
         # self.model = torch.compile(self.model)
         self.criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
@@ -78,14 +86,24 @@ class LitResnet(LightningModule):
 
     def forward(self, x):
         logits = self.model(x)
-        #pooled_features = self.pooling(features).flatten(1)
-        #output = self.softmax(self.linear(pooled_features))
         return logits
 
     def predict(self, x):
+        x = self.check_size(x)
         logits = self.model(x)
         pred = self.out_activation(logits, dim=1)
         return pred
+
+    def check_size(self, x):
+        # Current size of the image tensor (assumed to be [batch, channels, height, width])
+        _, _, current_height, current_width = x.size()
+
+        target_size = (self.size, self.size)
+
+        # Only downsize if the current dimensions are different from the target size
+        if (current_height, current_width) != target_size:
+            x = torch.nn.functional.interpolate(x, size=target_size, mode='bilinear', align_corners=False)
+        return x
 
     def training_step(self, batch, batch_idx):
         # Define training step for Trainer Module
@@ -245,6 +263,10 @@ class Ensemble(LightningModule):
         for model in self.models:
             model.freeze_feature_extractor()
 
+    def set_class_weights(self, class_weights):
+        for model in self.models:
+            model.criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
+
 
     def __call__(self,
              img,
@@ -324,13 +346,16 @@ class Ensemble(LightningModule):
     
             # Save the collected data to CSV if `collect` is enabled
             if collection_name:
-                collection_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', 'fine-tuning-data', collection_name)
+                collection_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', 'fine-tuning-data', collection_name + '.csv')
+                
+                if not os.path.exists(os.path.dirname(collection_path)):
+                    os.mkdir(os.path.dirname(collection_path))
                 
                 data_collection = pd.DataFrame.from_dict({'isic_id': data_ids,
                                                           'target_true': data_targets, 
                                                           'target': data_preds,
                                                           'model_id': data_modelids})
-                data_collection.to_csv(collection_path + '.csv', index=False, mode='a', header=not os.path.exists(collection_path + '.csv'))
+                data_collection.to_csv(collection_path, index=False, mode='a', header=not os.path.exists(collection_path))
     
         return torch.stack(ensemble_predictions).to(self.device_to_be)  # Ensure the final tensor is on the right device
 
@@ -407,11 +432,11 @@ class Ensemble(LightningModule):
         for img, target, isic_id in tqdm(dataset.dataloader):
             _ = self(img, target, isic_id, collection_name=collection_name, voting=voting)
         
-    def fine_tune_models(self, collection_name, data_dir='ISIC2024/train-image/image/', learning_rate=1e-5, only_classifier=False):
+    def fine_tune_models(self, collection_name, data_dir='ISIC2024/train-image/image/', learning_rate=1e-6, only_classifier=False):
         self.set_learning_rate(lr=learning_rate)
-        batch_size = 1
+        batch_size = 128
         if self.low_precision is True:
-            self.convert_to_fp16()
+            self.convert_to_fp32()
         if only_classifier:
             self.freeze_feature_extractors()
         collection_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', 'fine-tuning-data')
@@ -421,8 +446,8 @@ class Ensemble(LightningModule):
             self.switch_models_to_cpu(keep_model_idx=model_id)
             dh_train = data.DataHandler(data_dir=data_dir,
                                         meta_name=meta_path,
-                                        width=self.width,
-                                        height=self.height,
+                                        width=model.size,
+                                        height=model.size,
                                         batch_size=batch_size,
                                         num_workers=8,
                                         model_name=self.model_names[model_id],
@@ -440,7 +465,7 @@ class Ensemble(LightningModule):
             
             trainer = Trainer(devices=1,
                       accelerator='cuda',
-                      max_epochs=1,
+                      max_epochs=10,
                       #logger=logger,
                       #log_every_n_steps=batches_per_epoch,
                       enable_checkpointing=False,

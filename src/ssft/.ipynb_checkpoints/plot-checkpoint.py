@@ -45,57 +45,106 @@ def plot_cycle_accs(directory):
     plot_path = os.path.join(directory, 'model_accuracies_plot.png')
     plt.savefig(plot_path)
     print(f"Plot saved to {plot_path}")
+    
 
-def plot_cycle_data(directory):
+# Function to process all CSVs and return combined DataFrame
+def load_csvs(directory):
+    dfs = []
+    # Loop through all CSV files in the directory
+    if not os.path.isdir(directory):
+        directory = os.path.dirname(directory)
+    for file in os.listdir(directory):
+        if file.endswith(".csv"):
+            cycle = int(file.split('_')[-1].split('.')[0])  # Extract cycle number from filename
+            df = pd.read_csv(os.path.join(directory, file))
+            df['cycle'] = cycle  # Add cycle column to each DataFrame
+            dfs.append(df)
+    # Concatenate all DataFrames
+    return pd.concat(dfs, ignore_index=True)
 
-    directory = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")), 'datasets', 'fine-tuning-data', directory)
-    # Load the CSV data
-    df = pd.read_csv(directory + '.csv')
-    
-    
-    # Add a column for correct/incorrect classification
-    df['correct'] = df['target_true'] == df['target']
-    
-    # Group the data by model_id, target (class), and whether it was correct
-    grouped = df.groupby(['model_id', 'target', 'correct']).size().reset_index(name='count')
-    
-    # Pivot the table to separate correct and incorrect counts
-    pivot_table = grouped.pivot_table(index=['model_id', 'target'], columns='correct', values='count', fill_value=0)
-    
-    # Separate correct and incorrect counts
-    correct_classifications = pivot_table[True] if True in pivot_table.columns else pd.DataFrame()
-    incorrect_classifications = pivot_table[False] if False in pivot_table.columns else pd.DataFrame()
-    
-    # Plotting
-    fig, ax = plt.subplots(figsize=(12, 6))
-    
-    # Unstack correct classifications for plotting (reshape to have classes as columns)
-    correct_unstacked = correct_classifications.unstack(level='target')
-    
-    # Plot correct classifications (colored bars)
-    correct_unstacked.plot(kind='bar', stacked=True, ax=ax, colormap='tab10')
-    
-    # Overlay incorrect classifications (black bars)
-    # For each model_id and target, we plot the black bars
-    for idx, (model, target) in enumerate(correct_classifications.index):
-        correct_count = correct_classifications.loc[(model, target)] if (model, target) in correct_classifications.index else 0
-        incorrect_count = incorrect_classifications.loc[(model, target)] if (model, target) in incorrect_classifications.index else 0
-        ax.bar(idx, incorrect_count, bottom=correct_count, width=0.8, color='black')
-    
-    # Set plot title and labels
-    plt.title('Amount of Collected Data (Correct vs Incorrect) per Model and Class')
-    plt.xlabel('Model')
-    plt.ylabel('Number of Data Points')
-    
-    # Display legend (classes)
-    plt.legend(title='Class', bbox_to_anchor=(1.05, 1), loc='upper left')
-    
-    # Show the plot
+
+# Function to calculate correctness percentage and positive target ratio
+def compute_metrics(df):
+    # Group by cycle and compute metrics
+    grouped = df.groupby('cycle').apply(lambda x: pd.Series({
+        'correctness': np.mean(x['target_true'] == x['target']),  # correctness percentage
+        'positive_ratio': np.mean(x['target'] == 1)  # positive ratio percentage
+    })).reset_index()
+
+    return grouped
+
+
+# Function to calculate per-model metrics
+def compute_per_model_metrics(df):
+    # Group by cycle and model_id to compute metrics
+    grouped_per_model = df.groupby(['cycle', 'model_id']).apply(lambda x: pd.Series({
+        'correctness': np.mean(x['target_true'] == x['target']) * 100,
+        'positive_ratio': np.mean(x['target'] == 1) * 100
+    })).reset_index()
+
+    return grouped_per_model
+
+
+# Function to plot overall correctness and positive ratio
+def plot_overall_metrics(metrics):
+    plt.figure(figsize=(10, 6))
+
+    # Plot overall correctness
+    plt.plot(metrics['cycle'], metrics['correctness'], label='Correctness (%)', color='blue', marker='o')
+    # Plot overall positive ratio
+    plt.plot(metrics['cycle'], metrics['positive_ratio'], label='Positive Ratio (%)', color='green', marker='o')
+
+    plt.xlabel('Cycle')
+    plt.ylabel('Percentage')
+    plt.title('Overall Correctness and Positive Target Ratio Across Cycles')
+    plt.legend()
+    plt.grid(True)
     plt.tight_layout()
-    plot_path = directory + '_plot.png'
-    plt.savefig(plot_path)
-    print(f"Plot saved to {plot_path}")
-    
+    plt.savefig("overall_metrics_plot.png")  # Save the plot in the directory
 
+
+# Function to plot per-model metrics
+def plot_per_model_metrics(metrics):
+    plt.figure(figsize=(12, 8))
+    models = metrics['model_id'].unique()
+
+    for model_id in models:
+        model_data = metrics[metrics['model_id'] == model_id]
+
+        plt.plot(model_data['cycle'], model_data['correctness'], label=f'Correctness {model_id}', marker='o')
+        plt.plot(model_data['cycle'], model_data['positive_ratio'], label=f'Positive Ratio {model_id}', marker='x')
+
+    plt.xlabel('Cycle')
+    plt.ylabel('Percentage')
+    plt.title('Per-Model Correctness and Positive Target Ratio Across Cycles')
+    plt.legend(loc='best')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig("per_model_metrics_plot.png")  # Save the plot in the directory
+
+
+def plot_cycle_data(collection_name):
+    directory = os.path.join(os.path.abspath(os.path.join(os.getcwd(), "../..")),
+                             'datasets',
+                             'fine-tuning-data',
+                             collection_name
+                            )
+    
+    # Load all CSVs into a single DataFrame
+    df = load_csvs(directory)
+    
+    # Compute overall correctness and positive ratio metrics
+    overall_metrics = compute_metrics(df)
+    
+    # Compute per-model correctness and positive ratio metrics
+    per_model_metrics = compute_per_model_metrics(df)
+    
+    # Plot overall metrics
+    plot_overall_metrics(overall_metrics)
+    
+    # Plot per-model metrics
+    plot_per_model_metrics(per_model_metrics)
+
+    
 if __name__ == "__main__":
     plot_cycle_data('VIENNA_20240926-2228279')

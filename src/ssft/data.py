@@ -7,6 +7,9 @@ from torchvision import transforms, datasets
 from torchvision.datasets.folder import default_loader
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
+import gc
+
+#torch.set_default_dtype(torch.float16)
 
 pd.set_option("future.no_silent_downcasting", True)
 
@@ -42,6 +45,23 @@ def preprocess_meta(df, meta_name, img_dir):
     df = df[~df['isic_id'].isin(missing_files)]
     return df
 
+
+def compute_class_weights(targets):
+    # Count the number of samples for each class
+    class_0_count = np.sum(targets == 0)
+    class_1_count = np.sum(targets == 1)
+    
+    # Total number of samples
+    total_samples = len(targets)
+    
+    # Compute class weights as inverse of class frequency
+    weight_0 = total_samples / (2 * class_0_count)
+    weight_1 = total_samples / (2 * class_1_count)
+    
+    # Store the weights in a numpy array
+    class_weights = np.array([weight_0, weight_1])
+    return torch.from_numpy(class_weights)
+    
 
 class CustomImgFolderDataset(datasets.ImageFolder):
 
@@ -94,6 +114,8 @@ class CustomMetaDataset(Dataset):
         if split:
             self.file_names = slice_by_percentage(self.file_names, split, train)
             self.targets = slice_by_percentage(self.targets, split, train)
+
+        self.class_weights = compute_class_weights(self.targets)
 
         self.filetype = filetype
         self.transform = transform
@@ -239,23 +261,28 @@ class DataHandler:
         # Set Augmentations
         self.transform = transforms.Compose([
             transforms.PILToTensor(),
-            transforms.RandomHorizontalFlip(0.5),
-            transforms.RandomVerticalFlip(0.5),
             transforms.RandomResizedCrop(size=(self.height, self.width),
-                                         scale=(0.8, 1.2)),
-            transforms.ColorJitter(brightness=64,
-                                   contrast=0.75,
-                                   saturation=0.25,
-                                   hue=0.04
+                                         scale=(0.8, 1.2),
+                                         ratio=(0.9, 1.1)),
+            transforms.ColorJitter(brightness=0.2,
+                                   contrast=0.2,
+                                   saturation=0.2,
+                                   hue=0.2
                                    ),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomVerticalFlip(),
             transforms.ConvertImageDtype(dtype),
-            transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
+            # Imagenet Mean and Variance
+            transforms.Normalize(mean=[0.485,0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225]),
         ])
         self.transform_val = transforms.Compose([
             transforms.PILToTensor(),
             transforms.Resize((self.height, self.width)),
             transforms.ConvertImageDtype(dtype),
-            transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
+            # Imagenet Mean and Variance
+            transforms.Normalize(mean=[0.485,0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225]),
         ])
         self.target_transform = transforms.Compose([
                                  lambda x:torch.tensor(x), # or just torch.LongTensor
