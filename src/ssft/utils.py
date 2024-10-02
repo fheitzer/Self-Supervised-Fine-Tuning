@@ -10,6 +10,14 @@ import gc
 import os
 
 
+def save_top_trials(study, n, filename='top_trials.csv'):
+    # Get the top n trials sorted by value (ascending)
+    top_trials = study.trials_dataframe().sort_values("value", ascending=True).head(n)
+
+    filename = os.path.join(filename, 'top_trials.csv')
+    # Save the top trials DataFrame as a CSV file
+    top_trials.to_csv(filename, index=False)
+
 def save_dict(details, name='name'):
     # Extract directory from the given file path
     directory = os.path.dirname(name)

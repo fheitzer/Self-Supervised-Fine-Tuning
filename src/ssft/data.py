@@ -87,7 +87,6 @@ class CustomMetaDataset(Dataset):
                  img_dir,
                  transform: transforms.Compose,
                  target_transform: transforms.Compose,
-                 attribution: str=None, # deprecated
                  split: float=0.85,
                  train: bool=True,
                  model_id: int=None,
@@ -121,7 +120,6 @@ class CustomMetaDataset(Dataset):
         self.transform = transform
         self.target_transform = target_transform
         self.img_dir = img_dir
-        self.train = train
         del df
         gc.collect()
 
@@ -149,7 +147,6 @@ class CustomMetaDatasetBalanced(Dataset):
                  img_dir,
                  transform: transforms.Compose,
                  target_transform: transforms.Compose,
-                 attribution: str=None, # deprecated
                  split: float=0.85,
                  train: bool=True,
                  model_id: int=None,
@@ -298,7 +295,6 @@ class DataHandler:
                                                          train=train,
                                                          transform=self.transform if train else self.transform_val,
                                                          target_transform=self.target_transform,
-                                                         attribution=attribution,
                                                          model_id=model_id,
                                                          process_meta=process_meta,
                                                          split=split)
@@ -308,7 +304,6 @@ class DataHandler:
                                                          train=train,
                                                          transform=self.transform if train else self.transform_val,
                                                          target_transform=self.target_transform,
-                                                         attribution=attribution,
                                                          model_id=model_id,
                                                          process_meta=process_meta,
                                                          split=split)

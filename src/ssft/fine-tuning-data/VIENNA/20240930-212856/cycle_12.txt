@@ -1,0 +1,16 @@
+resnet18 accuracy: 0.6470588445663452
+resnet18 balanced_accuracy: 0.6475636959075928
+resnet18 specificity: 0.6904761791229248
+resnet18 sensitivity: 0.604651153087616
+resnet34 accuracy: 0.658823549747467
+resnet34 balanced_accuracy: 0.6602990031242371
+resnet34 specificity: 0.7857142686843872
+resnet34 sensitivity: 0.5348837375640869
+resnet50 accuracy: 0.6235294342041016
+resnet50 balanced_accuracy: 0.6245847344398499
+resnet50 specificity: 0.7142857313156128
+resnet50 sensitivity: 0.5348837375640869
+ensemble accuracy: 0.6352941393852234
+ensemble balanced_accuracy: 0.6367663145065308
+ensemble specificity: 0.761904776096344
+ensemble sensitivity: 0.5116279125213623

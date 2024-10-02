@@ -1,5 +1,6 @@
 import pandas as pd
 import torch
+import torchmetrics
 import timm
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.loggers import TensorBoardLogger
@@ -234,12 +235,15 @@ class Ensemble(LightningModule):
             if i != keep_model_idx:
                 # Move model to CPU
                 self.models[i] = model.to('cpu')
+                self.models[i].confusion_matrix = model.confusion_matrix.to('cpu')
             else:
                 self.models[i] = model.to('cuda')
+                self.models[i].confusion_matrix = model.confusion_matrix.to('cuda')
 
     def send_models_to_device(self):
         for i, model in enumerate(self.models):
             self.models[i] = model.to(self.device_to_be)
+            self.models[i].confusion_matrix = model.confusion_matrix.to('cuda')
 
     def convert_to_fp16(self):
         """Convert all models in the list to FP16 (half precision)."""
@@ -275,6 +279,8 @@ class Ensemble(LightningModule):
              collection_name: str = None,
              voting: str = 'hard',
              onehot: bool = True,
+             return_model_preds=False,
+             single_minority_vote_only=False,
              ):
         """
         Make prediction using a majority voting
@@ -334,6 +340,10 @@ class Ensemble(LightningModule):
     
                     # Identify minority vote model indices
                     minority_ids = [j for j, pred in enumerate(datapoint_preds) if pred != majority_vote]
+
+                    # Skip if more than one model is in the minority vote
+                    if single_minority_vote_only and len(minority_ids) != 1:
+                        continue 
     
                     # Collect data if needed
                     if collection_name:
@@ -356,8 +366,11 @@ class Ensemble(LightningModule):
                                                           'target': data_preds,
                                                           'model_id': data_modelids})
                 data_collection.to_csv(collection_path, index=False, mode='a', header=not os.path.exists(collection_path))
-    
-        return torch.stack(ensemble_predictions).to(self.device_to_be)  # Ensure the final tensor is on the right device
+
+        if return_model_preds:
+            return torch.stack(ensemble_predictions).to(self.device_to_be), model_predictions
+        else:
+            return torch.stack(ensemble_predictions).to(self.device_to_be)  # Ensure the final tensor is on the right device
 
     def fit(self, ds, epochs:int):
         """
@@ -375,14 +388,19 @@ class Ensemble(LightningModule):
             data = data.half()
         return torch.stack([model.predict(data) for model in self.models])
 
-    def test_ensemble(self, ds):
+
+    def test_ensembleOLD(self, ds):
         """
-        Test the performance of the ensemble on a test dataset
+        Test the performance of the ensemble on a test dataset.
+        Returns accuracy, balanced accuracy, specificity, and sensitivity.
         """
         print('Testing Ensemble...')
-        total_correct = 0.0
-        total_samples = 0.0
         
+        total_samples = 0.0
+    
+        # Initialize confusion matrix metric for binary classification
+        confusion_matrix = torchmetrics.classification.BinaryConfusionMatrix().to(self.device_to_be)
+    
         for i, (img, target, isic_id) in enumerate(tqdm(ds)):
             preds = self(img, onehot=False)  # Ensemble predictions (non-one-hot)
             
@@ -390,39 +408,143 @@ class Ensemble(LightningModule):
             target = target.to(self.device_to_be)
             target_classes = torch.argmax(target, dim=1)
             
-            # Calculate the number of correct predictions
-            correct_results_sum = (preds == target_classes).sum().float()
+            # Update confusion matrix with predictions and targets
+            confusion_matrix.update(preds, target_classes)
             
-            # Accumulate correct predictions and total number of samples
-            total_correct += correct_results_sum
+            # Accumulate total samples
             total_samples += target.shape[0]
         
-        # Final accuracy calculation (total correct / total samples)
-        accuracy = total_correct / total_samples
+        # Compute the confusion matrix
+        tn, fp, fn, tp = confusion_matrix.compute().flatten()
     
-        return accuracy
+        # Calculate metrics
+        accuracy = (tp + tn) / (tp + tn + fp + fn)
+        sensitivity = tp / (tp + fn)  # Recall
+        specificity = tn / (tn + fp)
+        balanced_accuracy = (sensitivity + specificity) / 2
+    
+        # Return all metrics
+        results = {
+            "ensemble accuracy": accuracy.item(),
+            "ensemble balanced_accuracy": balanced_accuracy.item(),
+            "ensemble specificity": specificity.item(),
+            "ensemble sensitivity": sensitivity.item()
+        }
+        
+        return results
+
+    def test_ensemble(self, ds, test_models=False, collection_name=None, single_minority_vote_only=False):
+        """
+        Test the performance of the ensemble on a test dataset.
+        Returns accuracy, balanced accuracy, specificity, and sensitivity.
+        """
+        print('Testing Ensemble...')
+        
+        total_samples = 0.0
+    
+        # Initialize confusion matrix metric for binary classification
+        confusion_matrix = torchmetrics.classification.BinaryConfusionMatrix().to(self.device_to_be)
+        if test_models:
+            metrics = [torchmetrics.classification.BinaryConfusionMatrix().to(self.device_to_be) for _ in self.models]
+    
+        for i, (img, target, isic_id) in enumerate(tqdm(ds)):
+            if test_models:
+                preds, preds_models = self(img,
+                                           target,
+                                           isic_id,
+                                           onehot=False,
+                                           return_model_preds=True,
+                                           collection_name=collection_name,
+                                           single_minority_vote_only=single_minority_vote_only
+                                          )  # Ensemble predictions (non-one-hot)
+            else:
+                preds = self(img, onehot=False, collection_name=collection_name) 
+            # Ensure target is on the same device as the predictions
+            target = target.to(self.device_to_be)
+            target_classes = torch.argmax(target, dim=1)
+            
+            # Update confusion matrix with predictions and targets
+            confusion_matrix.update(preds, target_classes)
+            
+            # Accumulate total samples
+            total_samples += target.shape[0]
+        
+            # Collect confusion matrix for each model
+            for j, model_probs in enumerate(preds_models):
+                predicted_classes = torch.argmax(model_probs, dim=1)
+                metrics[j].update(predicted_classes, target_classes)
+        
+        # Compute the confusion matrix
+        tn, fp, fn, tp = confusion_matrix.compute().flatten()
+    
+        # Calculate metrics
+        accuracy = (tp + tn) / (tp + tn + fp + fn)
+        sensitivity = tp / (tp + fn)  # Recall
+        specificity = tn / (tn + fp)
+        balanced_accuracy = (sensitivity + specificity) / 2
+    
+        # Return all metrics
+        results = {
+            "ensemble accuracy": accuracy.item(),
+            "ensemble balanced_accuracy": balanced_accuracy.item(),
+            "ensemble specificity": specificity.item(),
+            "ensemble sensitivity": sensitivity.item()
+        }
+        if test_models:
+            # Compute metrics for each model
+            results_models = dict()
+            for i, metric in enumerate(metrics):
+                tn, fp, fn, tp = metric.compute().view(-1)
+                
+                accuracy = (tp + tn) / (tp + tn + fp + fn)
+                specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+                sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0
+                balanced_accuracy = (sensitivity + specificity) / 2
+                
+                results.update({
+                    f"{self.model_names[i]} accuracy": accuracy.item(),
+                    f"{self.model_names[i]} balanced_accuracy": balanced_accuracy.item(),
+                    f"{self.model_names[i]} specificity": specificity.item(),
+                    f"{self.model_names[i]} sensitivity": sensitivity.item()
+                })
+            
+            return results, results_models
+        else:
+            return results
 
     def test_models(self, ds):
-        accs_total = [0.0] * len(self.models)
-        total_samples = 0
+        # Initialize metrics for each model
+        metrics = [torchmetrics.classification.BinaryConfusionMatrix().to(self.device_to_be) for _ in self.models]
         
         print('Testing Models...')
         for i, (img, target, isic_id) in enumerate(tqdm(ds)):
             probabilities = self.get_model_predictions(img)
             target = target.to(self.device_to_be)
-            target_classes = torch.argmax(target, dim=1)
-            total_samples += target.shape[0]
+            target_classes = torch.argmax(target, dim=1)  # Assuming target is one-hot encoded
             
-            # Collect accuracy for each model
+            # Collect confusion matrix for each model
             for j, model_probs in enumerate(probabilities):
                 predicted_classes = torch.argmax(model_probs, dim=1)
-                correct_results_sum = (predicted_classes == target_classes).sum().float()
-                accs_total[j] += correct_results_sum
+                metrics[j].update(predicted_classes, target_classes)
         
-        # Calculate average accuracy after looping over the dataset
-        average_accs = [correct_count / total_samples for correct_count in accs_total]
-
-        return average_accs
+        # Compute metrics for each model
+        results = dict()
+        for i, metric in enumerate(metrics):
+            tn, fp, fn, tp = metric.compute().view(-1)
+            
+            accuracy = (tp + tn) / (tp + tn + fp + fn)
+            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+            sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0
+            balanced_accuracy = (sensitivity + specificity) / 2
+            
+            results.update({
+                f"{self.model_names[i]} accuracy": accuracy.item(),
+                f"{self.model_names[i]} balanced_accuracy": balanced_accuracy.item(),
+                f"{self.model_names[i]} specificity": specificity.item(),
+                f"{self.model_names[i]} sensitivity": sensitivity.item()
+            })
+        
+        return results
 
     def classify_and_collect(self, dataset, collection_name, voting='hard'):
         """
@@ -432,9 +554,18 @@ class Ensemble(LightningModule):
         for img, target, isic_id in tqdm(dataset.dataloader):
             _ = self(img, target, isic_id, collection_name=collection_name, voting=voting)
         
-    def fine_tune_models(self, collection_name, data_dir='ISIC2024/train-image/image/', learning_rate=1e-6, only_classifier=False):
+    def fine_tune_models(self,
+                         collection_name,
+                         data_dir='ISIC2024/train-image/image/',
+                         learning_rate=1e-5,
+                         only_classifier=False,
+                         batch_size=8,
+                         epochs=4,
+                         transforms=False):
+        """
+        Fine Tune that fuckrrrrr
+        """
         self.set_learning_rate(lr=learning_rate)
-        batch_size = 128
         if self.low_precision is True:
             self.convert_to_fp32()
         if only_classifier:
@@ -453,7 +584,7 @@ class Ensemble(LightningModule):
                                         model_name=self.model_names[model_id],
                                         model_id=model_id,
                                         process_meta=False,
-                                        train=False,
+                                        train=transforms,
                                         split=None,
                                         balanced=False)
             if dh_train.dataset.empty:
@@ -465,7 +596,7 @@ class Ensemble(LightningModule):
             
             trainer = Trainer(devices=1,
                       accelerator='cuda',
-                      max_epochs=10,
+                      max_epochs=epochs,
                       #logger=logger,
                       #log_every_n_steps=batches_per_epoch,
                       enable_checkpointing=False,

@@ -1,0 +1,3 @@
+number,value,datetime_start,datetime_complete,duration,params_Batch Size,params_Epochs per Cycle,params_Freeze Feature Extractor,params_Learning Rate,state
+0,0.5227020978927612,2024-09-30 20:24:36.478193,2024-09-30 20:25:12.791301,0 days 00:00:36.313108,3,5,False,0.0010259712449284728,COMPLETE
+2,0.5617386102676392,2024-09-30 20:25:53.205131,2024-09-30 20:26:40.181020,0 days 00:00:46.975889,3,7,False,0.0008647127185905161,COMPLETE
